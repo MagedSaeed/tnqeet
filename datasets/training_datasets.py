@@ -1,4 +1,4 @@
-from datasets import load_dataset, DatasetDict, concatenate_datasets
+from datasets import load_dataset, DatasetDict, concatenate_datasets, Dataset
 from tnqeet import constants
 
 # Dataset configurations with text column mapping and processing functions
@@ -37,12 +37,69 @@ def extract_text(example, text_col, processor):
     text = processor(text) if processor else str(text)
     return normalize_unicode(text)
 
-def standardize(ds, text_col, processor, source_name):
-    """Standardize to text + source columns."""
-    return ds.map(lambda x: {
+def split_by_newlines(text):
+    """Split text by newlines and return non-empty lines."""
+    lines = text.split('\n')
+    return [line.strip() for line in lines if line.strip()]
+
+def standardize(ds, text_col, processor, source_name, minimum_words_threshold=10):
+    if f'standardize_{source_name}' in globals() and callable(globals()[f'standardize_{source_name}']):
+        return globals()[f'standardize_{source_name}'](ds, minimum_words_threshold)
+    
+    # Standard processing for other datasets
+    ds = ds.map(lambda x: {
         "text": extract_text(x, text_col, processor),
         "source": source_name
     }).remove_columns([col for col in ds.column_names if col not in ["text", "source"]])
+    
+    split_samples = []
+    for example in ds:
+        lines = split_by_newlines(example["text"])
+        for line in lines:
+            if len(line.split()) >= minimum_words_threshold:
+                split_samples.append({
+                    "text": line,
+                    "source": example["source"]
+                })
+    
+    return Dataset.from_list(split_samples)
+
+def standardize_tashkeela(ds, minimum_words_threshold=10):    
+    text_samples = []
+    diacritized_samples = []
+    
+    # Extract samples from both columns
+    for example in ds:
+        # Process 'text' column
+        if 'text' in example:
+            text_lines = split_by_newlines(normalize_unicode(str(example['text'])))
+            for line in text_lines:
+                if len(line.split()) >= minimum_words_threshold:
+                    text_samples.append({
+                        "text": line,
+                        "source": "tashkeela"
+                    })
+        
+        # Process 'diacritized' column  
+        if 'diacritized' in example:
+            diac_lines = split_by_newlines(normalize_unicode(str(example['diacritized'])))
+            for line in diac_lines:
+                if len(line.split()) >= minimum_words_threshold:
+                    diacritized_samples.append({
+                        "text": line,
+                        "source": "tashkeela"
+                    })
+    
+    # Calculate 50/50 split
+    min_count = min(len(text_samples), len(diacritized_samples))
+    half_count = min_count // 2
+    
+    # Take equal amounts from each column
+    final_samples = text_samples[:half_count] + diacritized_samples[:half_count]
+    
+    print(f"  → Tashkeela: {half_count} from 'text' + {half_count} from 'diacritized' = {len(final_samples)} total")
+    
+    return Dataset.from_list(final_samples)
 
 def main():
     print("Loading datasets...")
@@ -53,7 +110,10 @@ def main():
         print(f"Loading {name} dataset...")
         ds, text_col, processor = load_dataset_train(name, config_info)
         if ds:
-            datasets[name] = standardize(ds, text_col, processor, name)
+            standardized_ds = standardize(ds, text_col, processor, name)
+            datasets[name] = standardized_ds
+            if name != "tashkeela":  # Already printed for tashkeela
+                print(f"  → After splitting by newlines: {len(standardized_ds)} samples")
     
     # Create combined shuffled dataset
     all_datasets = list(datasets.values())
