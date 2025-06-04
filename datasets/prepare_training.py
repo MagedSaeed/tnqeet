@@ -10,6 +10,7 @@ DATASETS = {
     "sanad": ("arbml/SANAD", "Article", None),
     "oscar_small": (("nthngdy/oscar-small","unshuffled_deduplicated_ar"), "text", None),
     "arabic_wikipedia": ("SaiedAlshahrani/Arabic_Wikipedia_20230101_bots", "text", None),
+    "annotated_aoc": ("arbml/annotated_aoc", "Sentence1", None),  # New dataset added
     # "arabic_english_cs": ("MohamedRashad/arabic-english-code-switching", "sentence", None)
 }
 
@@ -64,6 +65,29 @@ def standardize(ds, text_col, processor, source_name, minimum_words_threshold=10
     
     return Dataset.from_list(split_samples)
 
+def standardize_annotated_aoc(ds, minimum_words_threshold=10):
+    """Custom standardization for annotated_aoc dataset to extract all Sentence# columns."""
+    samples = []
+    
+    for example in ds:
+        # Extract all sentence columns (Sentence1 to Sentence12)
+        for i in range(1, 13):  # Sentence1 to Sentence12
+            sentence_col = f"Sentence{i}"
+            if sentence_col in example and example[sentence_col] is not None:
+                text = normalize_unicode(str(example[sentence_col]))
+                # Split by newlines and filter
+                lines = split_by_newlines(text)
+                for line in lines:
+                    if len(line.split()) >= minimum_words_threshold:
+                        samples.append({
+                            "text": line,
+                            "source": "annotated_aoc"
+                        })
+    
+    print(f"  → Annotated AOC: extracted {len(samples)} samples from all Sentence columns")
+    
+    return Dataset.from_list(samples)
+
 def standardize_tashkeela(ds, minimum_words_threshold=10):    
     text_samples = []
     diacritized_samples = []
@@ -112,8 +136,8 @@ def main():
         if ds:
             standardized_ds = standardize(ds, text_col, processor, name)
             datasets[name] = standardized_ds
-            if name != "tashkeela":  # Already printed for tashkeela
-                print(f"  → After splitting by newlines: {len(standardized_ds)} samples")
+            if name not in ["tashkeela", "annotated_aoc"]:  # Already printed for these
+                print(f"  → Dataset Samples (after processing): {len(standardized_ds)} samples")
     
     # Create combined shuffled dataset
     all_datasets = list(datasets.values())
