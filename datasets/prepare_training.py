@@ -10,7 +10,7 @@ DATASETS = {
     "sanad": ("arbml/SANAD", "Article", None),
     "oscar_small": (("nthngdy/oscar-small","unshuffled_deduplicated_ar"), "text", None),
     "arabic_wikipedia": ("SaiedAlshahrani/Arabic_Wikipedia_20230101_bots", "text", None),
-    "arabic_english_cs": ("MohamedRashad/arabic-english-code-switching", "sentence", None)
+    # "arabic_english_cs": ("MohamedRashad/arabic-english-code-switching", "sentence", None)
 }
 
 def load_dataset_train(name, config_info):
