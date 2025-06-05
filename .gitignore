@@ -49,3 +49,7 @@ __pycache__
 
 docs/build
 site/
+
+
+# custom
+tnqeet_training_dataset*
