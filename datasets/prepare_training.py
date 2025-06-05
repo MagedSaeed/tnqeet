@@ -6,7 +6,7 @@ DATASETS = {
     "wasm": ("MagedSaeed/wasm", "Tweet", None),
     "iwslt": (("iwslt2017", "iwslt2017-ar-en"), "translation", lambda x: x["ar"]),
     "ashaar": ("arbml/ashaar", "poem verses", lambda x: " ".join(x) if isinstance(x, list) else str(x)), 
-    "tashkeela": ("community-datasets/tashkeela", "text", None),
+    "tashkeela": ("asas-ai/Tashkeela", "text", None),
     "sanad": ("arbml/SANAD", "Article", None),
     "oscar_small": (("nthngdy/oscar-small","unshuffled_deduplicated_ar"), "text", None),
     "arabic_wikipedia": ("SaiedAlshahrani/Arabic_Wikipedia_20230101_bots", "text", None),
@@ -44,7 +44,7 @@ def split_by_newlines(text):
     return [line.strip() for line in lines if line.strip()]
 
 def standardize(ds, text_col, processor, source_name, minimum_words_threshold=10):
-    if f'standardize_{source_name}' in globals() and callable(globals()[f'standardize_{source_name}']):
+    if callable(globals().get(f'standardize_{source_name}')):
         return globals()[f'standardize_{source_name}'](ds, minimum_words_threshold)
     
     # Standard processing for other datasets
@@ -53,40 +53,40 @@ def standardize(ds, text_col, processor, source_name, minimum_words_threshold=10
         "source": source_name
     }).remove_columns([col for col in ds.column_names if col not in ["text", "source"]])
     
-    split_samples = []
-    for example in ds:
-        lines = split_by_newlines(example["text"])
-        for line in lines:
-            if len(line.split()) >= minimum_words_threshold:
-                split_samples.append({
-                    "text": line,
-                    "source": example["source"]
-                })
+    def generate_split_samples():
+        for example in ds:
+            lines = split_by_newlines(example["text"])
+            for line in lines:
+                if len(line.split()) >= minimum_words_threshold:
+                    yield{
+                        "text": line,
+                        "source": example["source"]
+                    }
     
-    return Dataset.from_list(split_samples)
+    return Dataset.from_generator(generate_split_samples)
 
 def standardize_annotated_aoc(ds, minimum_words_threshold=10):
     """Custom standardization for annotated_aoc dataset to extract all Sentence# columns."""
-    samples = []
     
-    for example in ds:
-        # Extract all sentence columns (Sentence1 to Sentence12)
-        for i in range(1, 13):  # Sentence1 to Sentence12
-            sentence_col = f"Sentence{i}"
-            if sentence_col in example and example[sentence_col] is not None:
-                text = normalize_unicode(str(example[sentence_col]))
-                # Split by newlines and filter
-                lines = split_by_newlines(text)
-                for line in lines:
-                    if len(line.split()) >= minimum_words_threshold:
-                        samples.append({
-                            "text": line,
-                            "source": "annotated_aoc"
-                        })
+    def generate_samples():
+        for example in ds:
+            # Extract all sentence columns (Sentence1 to Sentence12)
+            for i in range(1, 13):  # Sentence1 to Sentence12
+                sentence_col = f"Sentence{i}"
+                if sentence_col in example and example[sentence_col] is not None:
+                    text = normalize_unicode(str(example[sentence_col]))
+                    # Split by newlines and filter
+                    lines = split_by_newlines(text)
+                    for line in lines:
+                        if len(line.split()) >= minimum_words_threshold:
+                            yield{
+                                "text": line,
+                                "source": "annotated_aoc"
+                            }
+    generated_dataset = Dataset.from_generator(generate_samples)
+    print(f"  → Annotated AOC: extracted {len(generated_dataset)} samples from all Sentence columns") # type: ignore
     
-    print(f"  → Annotated AOC: extracted {len(samples)} samples from all Sentence columns")
-    
-    return Dataset.from_list(samples)
+    return generated_dataset
 
 def standardize_tashkeela(ds, minimum_words_threshold=10):    
     text_samples = []
@@ -95,8 +95,8 @@ def standardize_tashkeela(ds, minimum_words_threshold=10):
     # Extract samples from both columns
     for example in ds:
         # Process 'text' column
-        if 'text' in example:
-            text_lines = split_by_newlines(normalize_unicode(str(example['text'])))
+        if 'text_no_taskheel' in example:
+            text_lines = split_by_newlines(normalize_unicode(str(example['text_no_taskheel'])))
             for line in text_lines:
                 if len(line.split()) >= minimum_words_threshold:
                     text_samples.append({
@@ -105,8 +105,8 @@ def standardize_tashkeela(ds, minimum_words_threshold=10):
                     })
         
         # Process 'diacritized' column  
-        if 'diacritized' in example:
-            diac_lines = split_by_newlines(normalize_unicode(str(example['diacritized'])))
+        if 'text' in example:
+            diac_lines = split_by_newlines(normalize_unicode(str(example['text'])))
             for line in diac_lines:
                 if len(line.split()) >= minimum_words_threshold:
                     diacritized_samples.append({
@@ -136,8 +136,8 @@ def main():
         if ds:
             standardized_ds = standardize(ds, text_col, processor, name)
             datasets[name] = standardized_ds
-            if name not in ["tashkeela", "annotated_aoc"]:  # Already printed for these
-                print(f"  → Dataset Samples (after processing): {len(standardized_ds)} samples")
+            if not callable(globals().get(f'standardize_{name}')):  # Already printed for these
+                print(f"  → Dataset Samples (after processing): {len(standardized_ds)} samples") # type: ignore
     
     # Create combined shuffled dataset
     all_datasets = list(datasets.values())
