@@ -106,7 +106,7 @@ def standardize_tashkeela(ds, minimum_words_threshold=10):
                         "source": "tashkeela"
                     })
         
-        # Process 'diacritized' column  
+        # Process 'diacritized' column
         if 'text' in example:
             diac_lines = split_by_newlines(normalize_unicode(str(example['text'])))
             for line in diac_lines:
