@@ -21,9 +21,9 @@ def load_dataset_train(name, config_info):
     config, text_col, processor = config_info
     
     if isinstance(config, tuple):
-        ds = load_dataset(config[0], config[1], split="train")
+        ds = load_dataset(config[0], config[1], split="train", trust_remote_code=True)
     else:
-        ds = load_dataset(config, split="train")
+        ds = load_dataset(config, split="train", trust_remote_code=True)
     
     print(f"✓ {name}: {len(ds)} samples") # type: ignore
     return ds, text_col, processor

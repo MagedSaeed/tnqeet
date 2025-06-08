@@ -53,3 +53,5 @@ site/
 
 # custom
 tnqeet_training_dataset*
+tnqeet_test_dataset*
+*venv*
