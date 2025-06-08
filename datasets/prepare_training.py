@@ -1,4 +1,6 @@
+import os
 from datasets import load_dataset, DatasetDict, concatenate_datasets, Dataset
+from huggingface_hub import login
 from tnqeet import constants
 
 # Dataset configurations with text column mapping and processing functions
@@ -125,31 +127,77 @@ def standardize_tashkeela(ds, minimum_words_threshold=10):
     
     return Dataset.from_list(final_samples)
 
-def main():
+def main(hf_repo_name="MagedSaeed/tnqeet-training-datasets", push_to_hub=True):
     print("Loading datasets...")
     
-    # Load all datasets
-    datasets = {}
+    # Load and process all datasets
+    processed_datasets = {}
     for name, config_info in DATASETS.items():
         print(f"Loading {name} dataset...")
         ds, text_col, processor = load_dataset_train(name, config_info)
         if ds:
             standardized_ds = standardize(ds, text_col, processor, name)
-            datasets[name] = standardized_ds
+            processed_datasets[name] = standardized_ds
             if not callable(globals().get(f'standardize_{name}')):  # Already printed for these
                 print(f"  → Dataset Samples (after processing): {len(standardized_ds)} samples") # type: ignore
     
     # Create combined shuffled dataset
-    all_datasets = list(datasets.values())
+    all_datasets = list(processed_datasets.values())
     combined = concatenate_datasets(all_datasets).shuffle(seed=constants.RANDOM_SEED)
-    datasets["all_shuffled"] = combined
+    processed_datasets["all_shuffled"] = combined
     
-    # Create DatasetDict and save
-    dataset_dict = DatasetDict(datasets)
-    dataset_dict.save_to_disk("./tnqeet_training_datasets")
-    
-    print(f"\n✓ Saved {len(datasets)-1} datasets + all_shuffled to ./tnqeet_training_datasets")
+    # Save locally - each dataset as a separate config
+    local_path = "./tnqeet_training_datasets"
+    print(f"\n✓ Processed {len(processed_datasets)} datasets (including all_shuffled)")
     print(f"Total samples in all_shuffled: {len(combined)}")
+    
+    # Push to Hugging Face Hub if requested
+    if push_to_hub:
+        print(f"\nPushing datasets as configs to Hugging Face Hub: {hf_repo_name}")
+        
+        # Login to HF
+        hf_token = os.environ.get('HF_TOKEN')
+        if not hf_token:
+            raise ValueError("HF_TOKEN not found in environment variables")
+        login(token=hf_token)
+        print("✓ Successfully logged in to Hugging Face")
+        
+        try:
+            # Push each dataset as a separate config
+            for config_name, dataset in processed_datasets.items():
+                print(f"  Pushing config: {config_name}")
+                
+                # Create DatasetDict with just train split for this config
+                config_dict = DatasetDict({"train": dataset})
+                
+                # Push this specific config
+                config_dict.push_to_hub(
+                    repo_id=hf_repo_name,
+                    config_name=config_name,  # This makes it a config, not a split
+                    private=True,
+                    commit_message=f"Upload {config_name} config"
+                )
+                print(f"    ✓ {config_name} config uploaded")
+            
+            print(f"\n✓ Successfully pushed all configs to https://huggingface.co/datasets/{hf_repo_name}")
+            print("You can now load datasets as:")
+            for config_name in processed_datasets.keys():
+                print(f"  load_dataset('{hf_repo_name}', '{config_name}', split='train')")
+                
+        except Exception as e:
+            print(f"✗ Error pushing to Hub: {e}")
+            print("You can still save datasets locally if needed.")
+    
+    else:
+        # Just save locally as separate files
+        for config_name, dataset in processed_datasets.items():
+            config_path = f"{local_path}_{config_name}"
+            config_dict = DatasetDict({"train": dataset})
+            config_dict.save_to_disk(config_path)
+            print(f"✓ Saved {config_name} to {config_path}")
 
 if __name__ == "__main__":
-    main()
+    # Modify these parameters as needed
+    HF_REPO_NAME = "MagedSaeed/tnqeet-training-datasets"  # Change this to your desired repo name
+    
+    main(hf_repo_name=HF_REPO_NAME, push_to_hub=True)

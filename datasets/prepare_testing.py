@@ -1,4 +1,6 @@
+import os
 from datasets import load_dataset, DatasetDict, concatenate_datasets, Dataset
+from huggingface_hub import login
 from tnqeet import constants
 import re
 
@@ -194,7 +196,7 @@ def sample_datasets(datasets, n_samples=500):
     
     return sampled_datasets
 
-def main():
+def main(hf_repo_name="MagedSaeed/tnqeet-testing-datasets", push_to_hub=True, n_samples=500):
     print("Loading test datasets...")
     
     # Load all datasets
@@ -208,21 +210,19 @@ def main():
             if not callable(globals().get(f'standardize_{name}')):
                 print(f"  → Dataset Samples (after processing): {len(standardized_ds)} samples") # type: ignore
     
-    print("\n=== Sampling 500 samples from each dataset ===")
+    print(f"\n=== Sampling {n_samples} samples from each dataset ===")
     
-    # Sample 500 samples from each dataset
-    sampled_datasets = sample_datasets(datasets, n_samples=500)
+    # Sample n_samples from each dataset
+    sampled_datasets = sample_datasets(datasets, n_samples=n_samples)
     
     # Create combined shuffled dataset
     all_datasets = list(sampled_datasets.values())
     combined = concatenate_datasets(all_datasets).shuffle(seed=constants.RANDOM_SEED)
     sampled_datasets["all_shuffled"] = combined
     
-    # Create DatasetDict and save
-    dataset_dict = DatasetDict(sampled_datasets)
-    dataset_dict.save_to_disk("./tnqeet_testing_datasets")
-    
-    print(f"\n✓ Saved {len(sampled_datasets)-1} datasets + all_shuffled to ./tnqeet_testing_datasets")
+    # Save locally
+    local_path = "./tnqeet_testing_datasets"
+    print(f"\n✓ Processed {len(sampled_datasets)} datasets (including all_shuffled)")
     print(f"Total samples in all_shuffled: {len(combined)}")
     
     # Print summary
@@ -231,6 +231,55 @@ def main():
         if name != "all_shuffled":
             print(f"{name}: {len(ds)} samples")
     print(f"all_shuffled: {len(combined)} samples")
+    
+    # Push to Hugging Face Hub if requested
+    if push_to_hub:
+        print(f"\nPushing datasets as configs to Hugging Face Hub: {hf_repo_name}")
+        
+        # Login to HF
+        hf_token = os.environ.get('HF_TOKEN')
+        if not hf_token:
+            raise ValueError("HF_TOKEN not found in environment variables")
+        login(token=hf_token)
+        print("✓ Successfully logged in to Hugging Face")
+        
+        try:
+            # Push each dataset as a separate config
+            for config_name, dataset in sampled_datasets.items():
+                print(f"  Pushing config: {config_name}")
+                
+                # Create DatasetDict with just train split for this config
+                config_dict = DatasetDict({"train": dataset})
+                
+                # Push this specific config
+                config_dict.push_to_hub(
+                    repo_id=hf_repo_name,
+                    config_name=config_name,  # This makes it a config, not a split
+                    private=True,
+                    commit_message=f"Upload {config_name} config with {len(dataset)} samples"
+                )
+                print(f"    ✓ {config_name} config uploaded ({len(dataset)} samples)")
+            
+            print(f"\n✓ Successfully pushed all configs to https://huggingface.co/datasets/{hf_repo_name}")
+            print("You can now load datasets as:")
+            for config_name in sampled_datasets.keys():
+                print(f"  load_dataset('{hf_repo_name}', '{config_name}', split='train')")
+                
+        except Exception as e:
+            print(f"✗ Error pushing to Hub: {e}")
+            print("Datasets are still processed and available locally if needed.")
+    
+    else:
+        # Just save locally as separate files
+        for config_name, dataset in sampled_datasets.items():
+            config_path = f"{local_path}_{config_name}"
+            config_dict = DatasetDict({"train": dataset})
+            config_dict.save_to_disk(config_path)
+            print(f"✓ Saved {config_name} to {config_path}")
 
 if __name__ == "__main__":
-    main()
+    # Parameters - modify as needed
+    HF_REPO_NAME = "MagedSaeed/tnqeet-testing-datasets"  # Using your username
+    N_SAMPLES = 500  # Number of samples to take from each dataset
+    
+    main(hf_repo_name=HF_REPO_NAME, push_to_hub=True, n_samples=N_SAMPLES)
