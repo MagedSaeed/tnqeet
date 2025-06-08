@@ -65,7 +65,7 @@ def clean_poetry_text(text):
             if cleaned_line:
                 cleaned_lines.append(cleaned_line)
     
-    return '\n'.join(cleaned_lines)
+    return '، '.join(cleaned_lines).strip().removesuffix('،').strip()
 
 def standardize(ds, text_col, processor, source_name, minimum_words_threshold=10):
     """Standardize dataset processing with special cases."""
@@ -92,19 +92,13 @@ def standardize(ds, text_col, processor, source_name, minimum_words_threshold=10
     
     def generate_split_samples():
         for example in ds:
-            if source_name == "poetry":
-                # For poetry, the text is already cleaned, just check word count
-                if len(example["text"].split()) >= minimum_words_threshold:
-                    yield example
-            else:
-                # For other datasets, split by newlines
-                lines = split_by_newlines(example["text"])
-                for line in lines:
-                    if len(line.split()) >= minimum_words_threshold:
-                        yield {
-                            "text": line,
-                            "source": example["source"]
-                        }
+            lines = split_by_newlines(example["text"])
+            for line in lines:
+                if len(line.split()) >= minimum_words_threshold:
+                    yield {
+                        "text": line,
+                        "source": example["source"]
+                    }
     
     return Dataset.from_generator(generate_split_samples)
 
