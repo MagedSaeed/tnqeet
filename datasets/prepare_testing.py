@@ -13,7 +13,7 @@ TEST_DATASETS = {
     "tashkeela": ("asas-ai/Tashkeela", "text", None, "train"),  # Special processing
     "kind": ("KIND-Dataset/KIND", "strippedText", None, "train"),
     "poetry": ("omkarthawakar/FannOrFlop", "poem_verses", None, "train"),  # Special processing
-    "arabic_english_code_switching": ("MohamedRashad/arabic-english-code-switching", "sentence", None, "train"),
+    "arabic_english_code_switching": ("MagedSaeed/arabic-english-code-switching-text", "text", None, "train"),
     "arasum": ("arbml/AraSum", "article", None, "train"),
     "social_media": ("KFUPM-JRCAI/arabic-generated-social-media-posts", "original_post", None, "train"),
     "LLMs_abstracts": ("KFUPM-JRCAI/arabic-generated-abstracts", None, None, None),  # Special processing
