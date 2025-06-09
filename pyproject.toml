@@ -48,7 +48,11 @@ dev = [
     "sphinx-copybutton",
     "sphinx-autobuild",
     "sphinx-autodoc-typehints==1.23.3",
-    "packaging"
+    "packaging",
+    #added,
+    "pyarabic~=0.6",
+    "datasets~=3.6",
+    "python-dotenv~=1.1",
 ]
 
 [tool.setuptools.packages.find]
