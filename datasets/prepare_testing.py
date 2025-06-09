@@ -12,10 +12,10 @@ TEST_DATASETS = {
     "tashkeela": ("asas-ai/Tashkeela", "text", None, "train"),  # Special processing
     "kind": ("KIND-Dataset/KIND", "strippedText", None, "train"),
     "poetry": ("omkarthawakar/FannOrFlop", "poem_verses", None, "train"),  # Special processing
-    "arabic_english_cs": ("MohamedRashad/arabic-english-code-switching", "sentence", None, "train"),
+    "arabic_english_code_switching": ("MohamedRashad/arabic-english-code-switching", "sentence", None, "train"),
     "arasum": ("arbml/AraSum", "article", None, "train"),
     "social_media": ("KFUPM-JRCAI/arabic-generated-social-media-posts", "original_post", None, "train"),
-    "abstracts": ("KFUPM-JRCAI/arabic-generated-abstracts", None, None, None),  # Special processing
+    "LLMs_abstracts": ("KFUPM-JRCAI/arabic-generated-abstracts", None, None, None),  # Special processing
 }
 
 def load_dataset_split(name, config_info):
@@ -140,14 +140,14 @@ def standardize_tashkeela(ds, minimum_words_threshold=10):
     
     return Dataset.from_list(final_samples)
 
-def standardize_abstracts(ds=None, minimum_words_threshold=10):
+def standardize_LLMs_abstracts(ds=None, minimum_words_threshold=10):
     """Custom standardization for arabic-generated-abstracts dataset."""
     # Load all three splits
     by_polishing = load_dataset("KFUPM-JRCAI/arabic-generated-abstracts", split="by_polishing")
     from_title = load_dataset("KFUPM-JRCAI/arabic-generated-abstracts", split="from_title")
     from_title_and_content = load_dataset("KFUPM-JRCAI/arabic-generated-abstracts", split="from_title_and_content")
     
-    print(f"  → Abstracts: by_polishing={len(by_polishing)}, from_title={len(from_title)}, from_title_and_content={len(from_title_and_content)}") # type: ignore
+    print(f"  → LLMs Abstracts: by_polishing={len(by_polishing)}, from_title={len(from_title)}, from_title_and_content={len(from_title_and_content)}") # type: ignore
     
     all_samples = []
     
@@ -166,10 +166,10 @@ def standardize_abstracts(ds=None, minimum_words_threshold=10):
                         if len(line.split()) >= minimum_words_threshold:
                             all_samples.append({
                                 "text": line,
-                                "source": "abstracts"
+                                "source": "LLMs_abstracts"
                             })
     
-    print(f"  → Abstracts: extracted {len(all_samples)} samples from all AI-generated columns and splits")
+    print(f"  → LLMs Abstracts: extracted {len(all_samples)} samples from all AI-generated columns and splits")
     
     return Dataset.from_list(all_samples)
 
@@ -242,8 +242,8 @@ def main(hf_repo_name="MagedSaeed/tnqeet-testing-datasets", push_to_hub=True, n_
             for config_name, dataset in sampled_datasets.items():
                 print(f"  Pushing config: {config_name}")
                 
-                # Create DatasetDict with just train split for this config
-                config_dict = DatasetDict({"train": dataset})
+                # Create DatasetDict with test split
+                config_dict = DatasetDict({"test": dataset})
                 
                 # Push this specific config
                 config_dict.push_to_hub(
@@ -257,7 +257,7 @@ def main(hf_repo_name="MagedSaeed/tnqeet-testing-datasets", push_to_hub=True, n_
             print(f"\n✓ Successfully pushed all configs to https://huggingface.co/datasets/{hf_repo_name}")
             print("You can now load datasets as:")
             for config_name in sampled_datasets.keys():
-                print(f"  load_dataset('{hf_repo_name}', '{config_name}', split='train')")
+                print(f"  load_dataset('{hf_repo_name}', '{config_name}', split='test')")
                 
         except Exception as e:
             print(f"✗ Error pushing to Hub: {e}")
@@ -267,7 +267,7 @@ def main(hf_repo_name="MagedSaeed/tnqeet-testing-datasets", push_to_hub=True, n_
         # Just save locally as separate files
         for config_name, dataset in sampled_datasets.items():
             config_path = f"{local_path}_{config_name}"
-            config_dict = DatasetDict({"train": dataset})
+            config_dict = DatasetDict({"test": dataset})
             config_dict.save_to_disk(config_path)
             print(f"✓ Saved {config_name} to {config_path}")
 

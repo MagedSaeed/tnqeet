@@ -7,7 +7,7 @@ from tnqeet import constants
 DATASETS = {
     "wasm": ("MagedSaeed/wasm", "Tweet", None),
     "iwslt": (("iwslt2017", "iwslt2017-ar-en"), "translation", lambda x: x["ar"]),
-    "ashaar": ("arbml/ashaar", "poem verses", lambda x: " ".join(x) if isinstance(x, list) else str(x)), 
+    "ashaar": ("arbml/ashaar", "poem verses", lambda x: "، ".join(x) if isinstance(x, list) else str(x)), 
     "tashkeela": ("asas-ai/Tashkeela", "text", None),
     "sanad": ("arbml/SANAD", "Article", None),
     "oscar_small": (("nthngdy/oscar-small","unshuffled_deduplicated_ar"), "text", None),
