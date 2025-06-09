@@ -2,6 +2,7 @@ import os
 from datasets import load_dataset, DatasetDict, concatenate_datasets, Dataset
 from huggingface_hub import login
 from tnqeet import constants
+from tqdm.auto import tqdm
 
 # Dataset configurations with text column mapping and processing functions
 DATASETS = {
@@ -95,7 +96,7 @@ def standardize_tashkeela(ds, minimum_words_threshold=10):
     diacritized_samples = []
     
     # Extract samples from both columns
-    for example in ds:
+    for example in tqdm(ds):
         # Process 'text' column
         if 'text_no_taskheel' in example:
             text_lines = split_by_newlines(normalize_unicode(str(example['text_no_taskheel'])))

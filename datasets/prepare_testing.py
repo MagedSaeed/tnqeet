@@ -3,6 +3,7 @@ from datasets import load_dataset, DatasetDict, concatenate_datasets, Dataset
 from huggingface_hub import login
 from tnqeet import constants
 import re
+from tqdm.auto import tqdm
 
 # Dataset configurations with text column mapping and processing functions
 TEST_DATASETS = {
@@ -108,7 +109,7 @@ def standardize_tashkeela(ds, minimum_words_threshold=10):
     text_samples = []
     
     # Extract samples from both columns (reversed priority from training)
-    for example in ds:
+    for example in tqdm(ds):
         # Process 'diacritized' column first (more priority than in training)
         if 'text' in example:
             diac_lines = split_by_newlines(normalize_unicode(str(example['text'])))
