@@ -24,11 +24,11 @@ def load_dataset_split(name, config_info):
     config, text_col, processor, split = config_info
     
     if isinstance(config, tuple):
-        ds = load_dataset(config[0], config[1], split=split)
+        ds = load_dataset(config[0], config[1], split=split, trust_remote_code=True)
     elif name.lower()=='kind':
-        ds = load_dataset(config, split=split, data_files='https://huggingface.co/datasets/KIND-Dataset/KIND/raw/main/KIND-Dialectal-Sentences.csv',)
+        ds = load_dataset(config, split=split, data_files='https://huggingface.co/datasets/KIND-Dataset/KIND/raw/main/KIND-Dialectal-Sentences.csv',trust_remote_code=True)
     else:
-        ds = load_dataset(config, split=split)
+        ds = load_dataset(config, split=split,trust_remote_code=True)
     
     print(f"✓ {name}: {len(ds)} samples from {split} split") # type: ignore
     return ds, text_col, processor
