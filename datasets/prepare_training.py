@@ -58,7 +58,7 @@ def standardize(ds, text_col, processor, source_name, minimum_words_threshold=10
     ds = ds.map(lambda x: {
         "text": extract_text(x, text_col, processor),
         "source": source_name
-    }).remove_columns([col for col in ds.column_names if col not in ["text", "source"]])
+    }).filter(lambda x: x["text"]).remove_columns([col for col in ds.column_names if col not in ["text", "source"]])
     
     def generate_split_samples():
         for example in ds:
@@ -179,7 +179,7 @@ def main(hf_repo_name="MagedSaeed/tnqeet-training-datasets", push_to_hub=True):
                 config_dict.push_to_hub(
                     repo_id=hf_repo_name,
                     config_name=config_name,  # This makes it a config, not a split
-                    private=True,
+                    private=False,
                     commit_message=f"Upload {config_name} config"
                 )
                 print(f"    ✓ {config_name} config uploaded")
