@@ -1,4 +1,5 @@
 import os
+import re
 from datasets import load_dataset, DatasetDict, concatenate_datasets, Dataset
 from huggingface_hub import login
 from tnqeet import constants
@@ -39,6 +40,9 @@ def extract_text(example, text_col, processor):
     """Extract and process text based on processor function."""
     text = example[text_col]
     text = processor(text) if processor else str(text)
+    text = ''.join(c for c in text if c.isprintable())
+    # remove multi spaces using re
+    text = re.sub(r'\s+', ' ', text).strip()
     return normalize_unicode(text)
 
 def split_by_newlines(text):
