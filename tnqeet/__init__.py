@@ -9,9 +9,9 @@ def remove_dots(text: str) -> str:
     for word in re.split(r"\s+", text):  # match every white space
         last_letter = utils.last_arabic_letter(word)
         if last_letter == "ن":
-            word = word[:-1] + constants.NOON_RASM
-        if word.endswith("ق"):
-            word = word[:-1] + constants.QAF_RASM
+            word = word[::-1].replace("ن", constants.NOON_RASM, 1)[::-1]
+        if last_letter == "ق":
+            word = word[::-1].replace("ق", constants.QAF_RASM, 1)[::-1]
         if word.startswith("ي") and len(word) > 1:
             word = constants.BAA_RASM + word[1:]
         if len(word) > 1:
