@@ -206,3 +206,10 @@ UNICODE_LETTERS_MAPPING = {
     "ﺙ": "ث",
     "ﺉ": "ئ",
 }
+
+ARABIC_LETTERS_WITHOUT_DOTS = {
+    'ك',
+    'ل',
+    'م',
+    'ء',
+}
