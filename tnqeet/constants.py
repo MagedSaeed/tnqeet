@@ -11,7 +11,7 @@ ARABIC_LETTERS = "".join(araby.LETTERS) + "".join(araby.LIGUATURES)
 
 
 ALEF_RASM = "ا"
-BAA_RASM = "\u066E"
+BAA_RASM = "\u066e"
 JEEM_RASM = "ح"
 DAL_RASM = "د"
 RAA_RASM = "ر"
@@ -19,13 +19,13 @@ SEEN_RASM = "س"
 SAAD_RASM = "ص"
 TAA_RASM = "ط"
 AIN_RASM = "ع"
-FAA_RASM = "\u06A1"
-QAF_RASM = "\u066F"
+FAA_RASM = "\u06a1"
+QAF_RASM = "\u066f"
 KAF_RASM = "ك"
 LAM_RASM = "ل"
 MEEM_RASM = "م"
 # NOON_RASM =u'\u06BA' same as baa_shape?
-NOON_RASM = "\u06BA"
+NOON_RASM = "\u06ba"
 HAA_RASM = "ه"
 WAW_RASM = "و"
 YAA_RASM = "ى"
@@ -35,6 +35,7 @@ LETTERS_MAPPING = {
     "ا": ALEF_RASM,
     "أ": ALEF_RASM,
     "إ": ALEF_RASM,
+    "آ": ALEF_RASM,
     "ب": BAA_RASM,
     "ت": BAA_RASM,
     "ث": BAA_RASM,
@@ -54,7 +55,7 @@ LETTERS_MAPPING = {
     "ع": AIN_RASM,
     "غ": AIN_RASM,
     "ف": FAA_RASM,
-    "ق": FAA_RASM,  # same as faa?
+    "ق": FAA_RASM,
     "ك": KAF_RASM,
     "ل": LAM_RASM,
     "م": MEEM_RASM,
@@ -205,11 +206,12 @@ UNICODE_LETTERS_MAPPING = {
     "ﻅ": "ظ",
     "ﺙ": "ث",
     "ﺉ": "ئ",
+    "\xa0": "",
 }
 
 ARABIC_LETTERS_WITHOUT_DOTS = {
-    'ك',
-    'ل',
-    'م',
-    'ء',
+    "ك",
+    "ل",
+    "م",
+    "ء",
 }
