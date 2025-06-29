@@ -56,3 +56,8 @@ tnqeet_training_dataset*
 tnqeet_test_dataset*
 *venv*
 .env
+kenlm
+tmp
+*trained_models*
+wandb
+lightning_logs
