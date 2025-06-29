@@ -31,6 +31,29 @@ WAW_RASM = "و"
 YAA_RASM = "ى"
 HAMZA_RASM = "ء"
 
+ARABIC_RASMS = [
+    ALEF_RASM,
+    BAA_RASM,
+    JEEM_RASM,
+    DAL_RASM,
+    RAA_RASM,
+    SEEN_RASM,
+    SAAD_RASM,
+    TAA_RASM,
+    AIN_RASM,
+    FAA_RASM,
+    QAF_RASM,
+    KAF_RASM,
+    LAM_RASM,
+    MEEM_RASM,
+    NOON_RASM,
+    HAA_RASM,
+    WAW_RASM,
+    YAA_RASM,
+    HAMZA_RASM,
+]
+
+
 LETTERS_MAPPING = {
     "ا": ALEF_RASM,
     "أ": ALEF_RASM,
@@ -55,11 +78,11 @@ LETTERS_MAPPING = {
     "ع": AIN_RASM,
     "غ": AIN_RASM,
     "ف": FAA_RASM,
-    "ق": FAA_RASM,
+    "ق": QAF_RASM,
     "ك": KAF_RASM,
     "ل": LAM_RASM,
     "م": MEEM_RASM,
-    "ن": BAA_RASM,
+    "ن": NOON_RASM,
     "ه": HAA_RASM,
     "ة": HAA_RASM,
     "و": WAW_RASM,
@@ -215,3 +238,51 @@ ARABIC_LETTERS_WITHOUT_DOTS = {
     "م",
     "ء",
 }
+
+
+def is_ambigous_rasm(letter):
+    """
+    returns whether a letter can be mapped to a dotted variant or not
+    """
+    return letter in set(ARABIC_RASMS) - set(ARABIC_LETTERS_WITHOUT_DOTS)
+
+
+# Dotless Arabic letter mapping
+# LETTERS_MAPPING = {
+#     "ا": ALEF_RASM,
+#     "أ": ALEF_RASM,
+#     "إ": ALEF_RASM,
+#     "آ": ALEF_RASM,
+#     "ب": BAA_RASM,
+#     "ت": BAA_RASM,
+#     "ث": BAA_RASM,
+#     "ج": JEEM_RASM,
+#     "ح": JEEM_RASM,
+#     "خ": JEEM_RASM,
+#     "د": DAL_RASM,
+#     "ذ": DAL_RASM,
+#     "ر": RAA_RASM,
+#     "ز": RAA_RASM,
+#     "س": SEEN_RASM,
+#     "ش": SEEN_RASM,
+#     "ص": SAAD_RASM,
+#     "ض": SAAD_RASM,
+#     "ط": TAA_RASM,
+#     "ظ": TAA_RASM,
+#     "ع": AIN_RASM,
+#     "غ": AIN_RASM,
+#     "ف": FAA_RASM,
+#     "ق": FAA_RASM,
+#     "ك": KAF_RASM,
+#     "ل": LAM_RASM,
+#     "م": MEEM_RASM,
+#     "ن": BAA_RASM,
+#     "ه": HAA_RASM,
+#     "ة": HAA_RASM,
+#     "و": WAW_RASM,
+#     "ؤ": WAW_RASM,
+#     "ي": YAA_RASM,
+#     "ى": YAA_RASM,
+#     "ئ": YAA_RASM,
+#     "ء": HAMZA_RASM,
+# }
