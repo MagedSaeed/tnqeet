@@ -6,6 +6,7 @@ from tnqeet.data import val_dataset
 from tnqeet import remove_dots
 from tnqeet.evaluate.metrics import wer, cer, doer
 from tnqeet.dotting_models.sequence_labeling.models import LSTMDottingModel
+from tnqeet.dotting_models.sequence_labeling.utils import split_text_by_threshold
 
 
 def get_model():
@@ -51,16 +52,25 @@ def evaluate_model(
             initial=len(per_example_results),
             total=len(dataset),
         ):
-            original_dotted_text = example["text"][:1024]  # type:ignore
-            dotless_text = remove_dots(original_dotted_text)
             time_before_prediction = datetime.now()
-            predicted_dotted_text = dotter.restore_dots(dotless_text)
+            original_dotted_text = example["text"]  # type:ignore
+            predicted_dotted_text = ""
+            for partial_dotted_text in split_text_by_threshold(
+                original_dotted_text,
+                threshold=dotter.max_sequence_length,
+            ):
+                partial_dotless_text = remove_dots(partial_dotted_text)
+                partial_predicted_dotted_text = dotter.restore_dots(partial_dotless_text)
+                predicted_dotted_text += partial_predicted_dotted_text.lstrip()  # type:ignore
+                if not predicted_dotted_text[-1].isspace():
+                    predicted_dotted_text += " "  # Ensure space at the end of each segment
+            predicted_dotted_text = predicted_dotted_text.strip()
             time_after_prediction = datetime.now()
             dotting_time = time_after_prediction - time_before_prediction
             per_example_results.append(
                 {
                     "original_dotted_text": original_dotted_text,
-                    "dotless_text": dotless_text,
+                    "dotless_text": remove_dots(original_dotted_text),
                     "predicted_dotted_text": predicted_dotted_text,
                     "text_source": example["source"],  # type:ignore
                     "wer": wer(original_dotted_text, predicted_dotted_text),
