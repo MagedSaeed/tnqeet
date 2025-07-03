@@ -78,15 +78,21 @@ def evaluate_model(
             dotless_text = remove_dots(original_dotted_text)
             retry_count = 0
             predicted_dotted_text = None
+            dotting_time = None
             while not predicted_dotted_text and retry_count < retry:
                 if retry_count > 0:
                     print(
                         f"Failed to restore dots for example index {len(per_example_results)} after {retry_count} retries. Retrying..."
                     )
-                time_before_prediction = datetime.now()
-                predicted_dotted_text = dotter.restore_dots(dotless_text)
-                time_after_prediction = datetime.now()
-                dotting_time = time_after_prediction - time_before_prediction
+                try:
+                    time_before_prediction = datetime.now()
+                    predicted_dotted_text = dotter.restore_dots(dotless_text)
+                    time_after_prediction = datetime.now()
+                    dotting_time = time_after_prediction - time_before_prediction
+                except Exception as e:
+                    print(f"Error during dot restoration: {e}")
+                    predicted_dotted_text = None
+                    pass
                 raw_dspy_logs = dotter.lm.history[-1].copy() if dotter.lm.history else {}
                 retry_count += 1
             per_example_results.append(
@@ -136,8 +142,8 @@ def evaluate_model(
 # print(evaluate_model('gemma-3'))
 
 # for prompt_type in ("default", "detailed"):
-for prompt_type in ("default",):
-    for fewshot in (0, 1, 3, 5, 8):
+for prompt_type in ("default", "detailed"):
+    for fewshot in (0, 1, 3, 5, 8, 10):
         for model in list(OPEN_ROUTER_MODELS.keys()):
             summary = evaluate_model(
                 model_name=model,
@@ -147,14 +153,14 @@ for prompt_type in ("default",):
             print(f"Summary for {model} with {prompt_type} prompt and {fewshot} fewshot: {summary}")
             print("-" * 120)
         print("=" * 120)
-print("=" * 120)
-for model in list(OPEN_ROUTER_MODELS.keys()):
-    summary = evaluate_model(
-        model_name=model,
-        prompt_type="detailed",
-    )
-    print(f"Summary for {model} with detailed prompt: {summary}")
-    print("-" * 120)
+# print("=" * 120)
+# for model in list(OPEN_ROUTER_MODELS.keys()):
+#     summary = evaluate_model(
+#         model_name=model,
+#         prompt_type="detailed",
+#     )
+#     print(f"Summary for {model} with detailed prompt: {summary}")
+#     print("-" * 120)
 
 
 # TODO:
