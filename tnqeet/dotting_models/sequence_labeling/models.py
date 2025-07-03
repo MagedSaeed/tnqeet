@@ -6,6 +6,7 @@ from transformers import AutoTokenizer
 from tnqeet import constants
 import torchmetrics
 
+
 tnqeet_tokenizer = AutoTokenizer.from_pretrained(
     "MagedSaeed/tnqeet-tokenizer",
     trust_remote_code=True,
@@ -18,7 +19,7 @@ class LSTMDottingModel(pl.LightningModule):
         vocab_size=None,
         output_size=None,
         pad_id=1,
-        seq_len=1024,
+        max_sequence_length=1024,
         hidden_size=512,
         embedding_size=512,
         dropout=0.33,
@@ -37,7 +38,7 @@ class LSTMDottingModel(pl.LightningModule):
         self.learning_rate = learning_rate
         self.dropout_prop = dropout
         self.pad_id = pad_id
-        self.max_sequence_length = seq_len
+        self.max_sequence_length = max_sequence_length
         self.output_size = output_size
 
         self.train_accuracy = torchmetrics.Accuracy(

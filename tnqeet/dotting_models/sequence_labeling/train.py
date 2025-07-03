@@ -18,15 +18,22 @@ model = LSTMDottingModel(
     vocab_size=datamodule.tokenizer.vocab_size,
     output_size=datamodule.tokenizer.vocab_size,
     pad_id=datamodule.tokenizer.pad_token_id,  # type: ignore
-    seq_len=datamodule.max_length,
+    max_sequence_length=datamodule.max_length,
     n_layers=num_layers,
 )
-trainer = get_trainer(
+trainer, checkpoint_path = get_trainer(
     model_name=model_name,
     logger=logger,
     n_layers=num_layers,
 )
 
-trainer.validate(model=model, datamodule=datamodule)
-trainer.fit(model=model, datamodule=datamodule)
-trainer.test(model=model, datamodule=datamodule)
+if checkpoint_path:
+    print(f"Resuming from checkpoint: {checkpoint_path}")
+    trainer.validate(model=model, datamodule=datamodule, ckpt_path=checkpoint_path)
+    trainer.fit(model=model, datamodule=datamodule, ckpt_path=checkpoint_path)
+    trainer.test(model=model, datamodule=datamodule, ckpt_path=checkpoint_path)
+else:
+    print("No checkpoint found, starting from scratch.")
+    trainer.validate(model=model, datamodule=datamodule)
+    trainer.fit(model=model, datamodule=datamodule)
+    trainer.test(model=model, datamodule=datamodule)
