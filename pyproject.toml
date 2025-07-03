@@ -61,6 +61,9 @@ dev = [
     "torchmetrics~=1.7",
     "scikit-learn~=1.7",
     "wandb~=0.20",
+    "tabulate~=0.9",
+    "matplotlib~=3.10",
+    "seaborn~=0.13",
 ]
 
 [tool.setuptools.packages.find]
