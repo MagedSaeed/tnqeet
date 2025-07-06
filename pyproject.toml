@@ -62,7 +62,7 @@ dev = [
     "scikit-learn~=1.7",
     "wandb~=0.20",
     "tabulate~=0.9",
-    "matplotlib~=3.10",
+    "matplotlib~=3.9",
     "seaborn~=0.13",
     "sentencepiece~=0.2",
 ]
