@@ -51,7 +51,9 @@ def evaluate_model(
     else:
         raise ValueError(f"Unknown fewshot value: {num_fewshot}")
     assert retry > 0 and isinstance(retry, int), "retry must be an integer greater than 0"
-    results_dir = f"tnqeet/dotting_models/llms/test_results/{dataset_name}/{evaluation_type}/{prompt_type}_prompt"
+    results_dir = (
+        f"tnqeet/dotting_models/llms/evaluation_results/{dataset_name}/{evaluation_type}/{prompt_type}_prompt"
+    )
     os.makedirs(results_dir, exist_ok=True)
     # make sure {model_name}.json file exists in the results_dir
     results_file = os.path.join(results_dir, f"{model_name}.json")
@@ -101,9 +103,9 @@ def evaluate_model(
                     "dotless_text": dotless_text,
                     "predicted_dotted_text": predicted_dotted_text if predicted_dotted_text else "",
                     "text_source": example["source"],  # type:ignore
-                    "wer": wer(original_dotted_text, predicted_dotted_text),
-                    "cer": cer(original_dotted_text, predicted_dotted_text),
-                    "doer": doer(original_dotted_text, predicted_dotted_text),
+                    "wer": wer(original_dotted_text, predicted_dotted_text[: len(original_dotted_text)]),  # type:ignore
+                    "cer": cer(original_dotted_text, predicted_dotted_text[: len(original_dotted_text)]),  # type:ignore
+                    "doer": doer(original_dotted_text, predicted_dotted_text[: len(original_dotted_text)]),  # type:ignore
                     "dotting_time": dotting_time or float("inf"),  # type:ignore
                     "tokens": raw_dspy_logs["usage"] if raw_dspy_logs else None,  # type:ignore
                     "raw_dspy_logs": raw_dspy_logs or {},  # type:ignore

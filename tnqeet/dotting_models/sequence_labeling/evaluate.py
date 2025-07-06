@@ -28,7 +28,7 @@ def evaluate_model(
     model_name="LSTM",
     n_layers=2,
 ):
-    results_dir = f"tnqeet/dotting_models/sequence_labeling/test_results/{dataset_name}"
+    results_dir = f"tnqeet/dotting_models/sequence_labeling/evaluation_results/{dataset_name}"
     os.makedirs(results_dir, exist_ok=True)
     results_file = os.path.join(results_dir, f"{model_name}_layers_{n_layers}_results.json")
     per_example_results = []

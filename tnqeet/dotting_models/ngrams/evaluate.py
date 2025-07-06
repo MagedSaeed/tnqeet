@@ -62,7 +62,7 @@ def evaluate_model(
     overwrite=False,
     save_every=5,
 ):
-    results_dir = f"tnqeet/dotting_models/ngrams/test_results/{dataset_name}/beam_size_{beam_size}"
+    results_dir = f"tnqeet/dotting_models/ngrams/evaluation_results/{dataset_name}/beam_size_{beam_size}"
     os.makedirs(results_dir, exist_ok=True)
     results_file = os.path.join(results_dir, f"ngrams_{ngrams}.json")
     per_example_results = []
