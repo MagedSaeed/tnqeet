@@ -61,20 +61,30 @@ class OpenRouterArabicDotter:
         dspy_cache=False,
         signature=ArabicDottingSignature,
         num_fewshot=0,
+        max_tokens=None,
         fewshot_dataset=None,
+        use_openrouter_model=True,
     ):
-        api_key = api_key or os.getenv("OPENROUTER_API_KEY")
+        if not use_openrouter_model:
+            if model.startswith("openai/"):
+                api_key = api_key or os.getenv("OPENAI_API_KEY")
+            elif model.startswith("anthropic/"):
+                api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
+            else:
+                raise ValueError(f"Unsupported model: {model}")
+        else:
+            api_key = api_key or os.getenv("OPENROUTER_API_KEY")
         if not api_key:
             raise ValueError("OpenRouter API key required")
 
         self.lm = dspy.LM(
-            model=f"openai/{model}",
+            model=model,
             api_key=api_key,
-            api_base="https://openrouter.ai/api/v1",
             temperature=0.01,
-            max_tokens=32000,
             model_type="chat",
             cache=dspy_cache,
+            max_tokens=max_tokens,  # type: ignore
+            api_base="https://openrouter.ai/api/v1" if use_openrouter_model else None,
         )
         dspy.configure(lm=self.lm)
 
