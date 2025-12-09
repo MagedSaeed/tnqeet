@@ -61,3 +61,6 @@ tmp
 *trained_models*
 wandb
 lightning_logs
+
+# Large evaluation result files
+tnqeet/dotting_models/llms/evaluation_results/test_dataset/fewshot_8/default_prompt/*.json
