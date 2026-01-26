@@ -7,7 +7,7 @@ from tnqeet.dotting_models.llms.models import (
     ArabicDottingSignature,
     DetailedArabicDotingSignature,
 )
-from tnqeet.data import val_dataset
+from tnqeet.data import llms_val_dataset
 from tnqeet import remove_dots
 from tnqeet.evaluate.metrics import wer, cer, doer
 
@@ -29,7 +29,7 @@ OPEN_ROUTER_MODELS = {
 
 def evaluate_model(
     model_name,
-    dataset=val_dataset,
+    dataset=llms_val_dataset,
     dataset_name="val_dataset",
     num_fewshot=0,
     evaluation_type="zeroshot",

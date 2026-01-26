@@ -203,7 +203,6 @@ class LSTMDottingModel(pl.LightningModule):
             optimizer=optimizer,
             factor=0.5,
             patience=2,
-            verbose=True,  # type: ignore
         )
         return {
             "optimizer": optimizer,
