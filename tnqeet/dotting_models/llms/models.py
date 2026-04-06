@@ -14,13 +14,8 @@ class ArabicDottingSignature(dspy.Signature):
     dotted_text = dspy.OutputField(desc="Text with proper dots added")
 
 
-class DetailedArabicDotingSignature(dspy.Signature):
-    f"""Arabic text dottization: restore dots to undotted Arabic text (Rasm).
-    Context: Arabic text without dots (Rasm) uses simplified letter forms where multiple
-    letters share the same basic shape. The dottization process restores the original
-    dotted letters based on context and meaning.
-
-    Key letter mappings (undotted → possible dotted forms):
+mapping_desc = f"""
+    Letter mappings (undotted → possible dotted forms):
     - {constants.BAA_RASM} (BAA_RASM) → ب ت ث ن
     - {constants.JEEM_RASM} (JEEM_RASM) → ج ح خ
     - {constants.DAL_RASM} (DAL_RASM) → د ذ
@@ -39,14 +34,11 @@ class DetailedArabicDotingSignature(dspy.Signature):
     - {constants.LAM_RASM} (LAM_RASM) → ل
     - {constants.MEEM_RASM} (MEEM_RASM) → م
     - {constants.HAMZA_RASM} (HAMZA_RASM) → ء
-    - {constants.ALEF_RASM} (ALEF_RASM) → ا أ إ آ
+    - {constants.ALEF_RASM} (ALEF_RASM) → ا أ إ آ""".strip()
 
-    Note: This version uses direct character-to-character mapping without positional
-    preprocessing. Each undotted character should be restored to its most contextually
-    appropriate dotted form."""
-
+class DetailedArabicDotingSignature(dspy.Signature):
     dotless_text = dspy.InputField(
-        desc="Arabic text without dots (Rasm) - simplified letter forms using direct character mapping"
+        desc=f"Arabic text without dots (Rasm) - simplified letter forms using direct character mapping as in the following:\n\n{mapping_desc}"
     )
     dotted_text = dspy.OutputField(
         desc="Properly dotted Arabic text with correct diacritical marks restored based on context and meaning"
@@ -84,12 +76,13 @@ class OpenRouterArabicDotter:
             model_type="chat",
             cache=dspy_cache,
             max_tokens=max_tokens,  # type: ignore
-            api_base="https://openrouter.ai/api/v1" if use_openrouter_model else None,
+            api_base="https://openrouter.ai/api/v1/" if use_openrouter_model else None,
         )
         dspy.configure(lm=self.lm)
 
         # Prepare few-shot examples if requested
         fewshot_dataset = fewshot_dataset or fewshot_val_dataset
+        signature = dspy.Signature({**signature.input_fields, **signature.output_fields}, signature.instructions, signature.__doc__) # type: ignore
         self.dotter = dspy.Predict(signature=signature)
         if num_fewshot > 0:
             examples = [

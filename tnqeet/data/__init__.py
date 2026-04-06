@@ -33,5 +33,17 @@ val_dataset = val_dataset.shuffle(seed=constants.RANDOM_SEED)
 llms_val_dataset = llms_val_dataset.shuffle(seed=constants.RANDOM_SEED)
 fewshot_val_dataset = fewshot_val_dataset.shuffle(seed=constants.RANDOM_SEED)
 
-# print(f"llms_val_dataset size: {len(val_dataset)}")
-# print(f"fewshot_val_dataset size: {len(fewshot_val_dataset)}")
+# Drop validation sets from train set to avoid data leakage
+all_val_indices = set(val_indices + fewshot_val_indices)
+train_indices = [i for i in range(len(train_dataset)) if i not in all_val_indices]  # type:ignore
+train_dataset = train_dataset.select(train_indices)  # type:ignore
+
+# print('train dataset size:', len(train_dataset))
+# print('val dataset size:', len(val_dataset))
+# print('llms val dataset size:', len(llms_val_dataset))
+# print('fewshot val dataset size:', len(fewshot_val_dataset))
+
+# print('fewshot val dataset number of words:', sum(len(example['text'].split()) for example in fewshot_val_dataset))  # type:ignore
+# print("llms val dataset number of words:", sum(len(example['text'].split()) for example in llms_val_dataset))  # type:ignore
+# print('val dataset number of words:', sum(len(example['text'].split()) for example in val_dataset))  # type:ignore
+# print('train dataset number of words:', sum(len(example['text'].split()) for example in train_dataset))  # type:ignore
