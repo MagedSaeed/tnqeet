@@ -2,8 +2,12 @@ import datasets
 from tnqeet import constants
 from collections import defaultdict
 
-train_dataset = datasets.load_dataset("MagedSaeed/tnqeet-training-datasets", "all_shuffled", split="train")
-test_dataset = datasets.load_dataset("MagedSaeed/tnqeet-testing-datasets", "all_shuffled", split="test")
+train_dataset = datasets.load_dataset(
+    "MagedSaeed/tnqeet-training-datasets", "all_shuffled", split="train"
+)
+test_dataset = datasets.load_dataset(
+    "MagedSaeed/tnqeet-testing-datasets", "all_shuffled", split="test"
+)
 
 # create validation datasets:
 
