@@ -1,7 +1,7 @@
 import os
 import glob
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
+from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping, TQDMProgressBar
 
 
 def get_trainer(
@@ -46,7 +46,7 @@ def get_trainer(
         patience=4,
         mode="min",
         verbose=True,
-        min_delta=0.00001,
+        min_delta=0.0001,
         check_finite=True,
     )
 
@@ -56,9 +56,10 @@ def get_trainer(
         accelerator="auto",
         deterministic=True,
         gradient_clip_val=1,
+        log_every_n_steps=1,
         max_epochs=max_epochs,
         val_check_interval=0.25,  # 4 evals per epoch
-        callbacks=[checkpoint_callback, early_stopping],
+        callbacks=[checkpoint_callback, early_stopping, TQDMProgressBar(refresh_rate=100)],
     )
 
     return trainer, latest_checkpoint

@@ -214,7 +214,7 @@ class LSTMDottingModel(pl.LightningModule):
     def restore_dots(
         self,
         dotless_texts,
-        tokenizer=tnqeet_tokenizer,
+        tokenizer=None,
         resolve_ambiguous_rasms_only=False,
     ):
         self.eval()
