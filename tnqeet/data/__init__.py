@@ -2,8 +2,12 @@ import datasets
 from tnqeet import constants
 from collections import defaultdict
 
-train_dataset = datasets.load_dataset("MagedSaeed/tnqeet-training-datasets", "all_shuffled", split="train")
-test_dataset = datasets.load_dataset("MagedSaeed/tnqeet-testing-datasets", "all_shuffled", split="test")
+train_dataset = datasets.load_dataset(
+    "MagedSaeed/tnqeet-training-datasets", "all_shuffled", split="train"
+)
+test_dataset = datasets.load_dataset(
+    "MagedSaeed/tnqeet-testing-datasets", "all_shuffled", split="test"
+)
 
 # create validation datasets:
 
@@ -47,3 +51,5 @@ train_dataset = train_dataset.select(train_indices)  # type:ignore
 # print("llms val dataset number of words:", sum(len(example['text'].split()) for example in llms_val_dataset))  # type:ignore
 # print('val dataset number of words:', sum(len(example['text'].split()) for example in val_dataset))  # type:ignore
 # print('train dataset number of words:', sum(len(example['text'].split()) for example in train_dataset))  # type:ignore
+# print(f"llms_val_dataset size: {len(val_dataset)}")
+# print(f"fewshot_val_dataset size: {len(fewshot_val_dataset)}")

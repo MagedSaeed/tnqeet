@@ -125,7 +125,7 @@ def evaluate_model(
     return summary
 
 
-for ngrams in range(2, 16):
+for ngrams in range(2, 11):
     for beam_size in [1, 3, 5, 7, 10, 12, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100]:
         summary = evaluate_model(ngrams=ngrams, beam_size=beam_size)
         print(f"Summary for beam size {beam_size} and {ngrams} ngrams: {summary}")

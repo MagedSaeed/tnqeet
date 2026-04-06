@@ -144,15 +144,4 @@ log_level = "DEBUG"
 [tool.uv.sources]
 kenlm = { git = "https://github.com/kpu/kenlm" }
 
-# for nexus server
-# Allow HTTP for this specific host
-# [[tool.uv.index]]
-# name = "nexus"
-# url = "http://10.22.154.101:8081/repository/pypi_proxy/simple"
-# authenticate = "never"
-
-# [[tool.uv.index]]
-# name = "pypi"  
-# url = "https://pypi.org/simple"
-
-# do not  forget to add MAX_ORDER=20 as an env variable (can be added to a .env file) when creating your virtual environment.
+# to install kenlm, do not forget to set the MAX_ORDER env variable first to your preferred number (maybe 15 or 20). 
