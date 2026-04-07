@@ -16,8 +16,10 @@ OPEN_ROUTER_MODELS = {
     "calude-haiku-3.5": "anthropic/claude-3.5-haiku",
     "gpt-4o": "openai/gpt-4o-2024-11-20",
     "gpt-4o-mini": "openai/gpt-4o-mini",
-    "gemini-2.5-flash-preview": "google/gemini-2.5-flash-preview-05-20",
-    "gemini-2.5-flash-lite": "google/gemini-2.5-flash-lite-preview-06-17",
+    # "gemini-2.5-flash-preview": "google/gemini-2.5-flash-preview-05-20",
+    "gemini-2.5-flash-preview": "google/gemini-2.5-flash",
+    # "gemini-2.5-flash-lite": "google/gemini-2.5-flash-lite-preview-06-17",
+    "gemini-2.5-flash-lite": "google/gemini-2.5-flash-lite",
     "deepseek-r1": "deepseek/deepseek-r1",
     "llama-3.3-70b": "meta-llama/llama-3.3-70b-instruct",
     "qwen-3-235b": "qwen/qwen3-235b-a22b",
@@ -62,7 +64,7 @@ def evaluate_model(
         print(f"Results for {model_name} already exist. Loading from {results_file}")
         with open(results_file, "r", encoding="utf-8") as f:
             per_example_results = json.load(f)
-    model = OPEN_ROUTER_MODELS[model_name]
+    model = f'openrouter/{OPEN_ROUTER_MODELS[model_name]}'
     dotter = OpenRouterArabicDotter(
         model=model,
         dspy_cache=False,

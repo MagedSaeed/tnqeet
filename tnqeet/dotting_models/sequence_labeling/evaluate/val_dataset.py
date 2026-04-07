@@ -42,6 +42,7 @@ def evaluate_model(
         checkpoint_name = [c for c in os.listdir(checkpoints_dir) if c.startswith("epoch=")][0]
         model = LSTMDottingModel.load_from_checkpoint(
             checkpoint_path=os.path.join(checkpoints_dir, checkpoint_name),
+            weights_only=False,
             # strict=False,
         )
     dotter = model

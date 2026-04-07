@@ -90,7 +90,7 @@ class DottingDataModule(pl.LightningDataModule):
         self,
         tokenizer=tokenizer,
         max_length: int = 1024,
-        batch_size: int = 512,
+        batch_size: int = 256,
         num_workers: int = 4,
         val_split: float = 0.05,
         stratify_column: str = "source",
