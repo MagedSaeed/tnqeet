@@ -19,7 +19,7 @@ class LSTMDottingModel(pl.LightningModule):
         vocab_size=None,
         output_size=None,
         pad_id=1,
-        max_sequence_length=1024,
+        max_sequence_length=2048,
         hidden_size=512,
         embedding_size=512,
         dropout=0.33,

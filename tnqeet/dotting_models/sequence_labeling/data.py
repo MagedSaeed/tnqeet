@@ -11,7 +11,7 @@ from transformers import AutoTokenizer
 
 # train_dataset = train_dataset.select(range(50_000))  # type:ignore
 
-tokenizer = AutoTokenizer.from_pretrained(
+tnqeet_tokenizer = AutoTokenizer.from_pretrained(
     "MagedSaeed/tnqeet-tokenizer",
     trust_remote_code=True,
 )
@@ -22,12 +22,12 @@ class LazyDottingDataset(Dataset):
         self,
         max_length,
         data_source: Union[pd.DataFrame, List[str]],
-        tokenizer=tokenizer,
+        tokenizer=None,
         text_column: str = "text",
     ):
-        self.tokenizer = tokenizer
         self.max_length = max_length
         self.text_column = text_column
+        self.tokenizer = tokenizer if tokenizer is not None else tnqeet_tokenizer
 
         # Handle both DataFrame and List inputs
         if isinstance(data_source, pd.DataFrame):
@@ -88,9 +88,9 @@ class LazyDottingDataset(Dataset):
 class DottingDataModule(pl.LightningDataModule):
     def __init__(
         self,
-        tokenizer=tokenizer,
-        max_length: int = 1024,
-        batch_size: int = 256,
+        tokenizer=None,
+        max_length: int = 2048,
+        batch_size: int = 128,
         num_workers: int = 4,
         val_split: float = 0.05,
         stratify_column: str = "source",
@@ -100,7 +100,7 @@ class DottingDataModule(pl.LightningDataModule):
         super().__init__()
         self.save_hyperparameters(ignore=["tokenizer", "kwargs"])
 
-        self.tokenizer = tokenizer
+        self.tokenizer = tokenizer if tokenizer is not None else tnqeet_tokenizer
         self.max_length = max_length
         self.batch_size = batch_size
         self.num_workers = num_workers

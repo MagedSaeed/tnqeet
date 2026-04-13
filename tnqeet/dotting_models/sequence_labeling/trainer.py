@@ -8,7 +8,7 @@ def get_trainer(
     model_name,
     logger=None,
     n_layers=1,
-    max_epochs: int = 100,
+    max_epochs: int = 10,
     checkpoint_dir: str = "tnqeet/dotting_models/sequence_labeling/trained_models/",
     resume_from_checkpoint: bool = True,
 ):
