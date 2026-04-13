@@ -8,15 +8,8 @@ from tnqeet.evaluate.metrics import wer, cer, doer
 from tnqeet.dotting_models.sequence_labeling.models import LSTMDottingModel
 from tnqeet.dotting_models.sequence_labeling.utils import split_text_by_threshold
 
-
-def get_model():
-    checkpoints_dir = "tnqeet/dotting_models/sequence_labeling/trained_models/LSTM"
-    checkpoint_name = [c for c in os.listdir(checkpoints_dir) if c.startswith("epoch=")][0]
-    model = LSTMDottingModel.load_from_checkpoint(
-        checkpoint_path=os.path.join(checkpoints_dir, checkpoint_name),
-        strict=False,
-    )
-    return model
+MODEL_NAME = "LSTM"
+CHECKPOINTS_ROOT = "tnqeet/dotting_models/sequence_labeling/trained_models"
 
 
 def evaluate_model(
@@ -25,7 +18,7 @@ def evaluate_model(
     dataset_name="test_dataset",
     overwrite=False,
     save_every=5,
-    model_name="LSTM",
+    model_name=MODEL_NAME,
     n_layers=4,
 ):
     results_dir = f"tnqeet/dotting_models/sequence_labeling/evaluation_results/{dataset_name}"
@@ -38,7 +31,7 @@ def evaluate_model(
             per_example_results = json.load(f)
     # load the model
     if model is None:
-        checkpoints_dir = f"tnqeet/dotting_models/sequence_labeling/trained_models/LSTM/layers_{n_layers}"
+        checkpoints_dir = os.path.join(CHECKPOINTS_ROOT, MODEL_NAME, f"layers_{n_layers}")
         checkpoint_name = [c for c in os.listdir(checkpoints_dir) if c.startswith("epoch=")][0]
         model = LSTMDottingModel.load_from_checkpoint(
             checkpoint_path=os.path.join(checkpoints_dir, checkpoint_name),
