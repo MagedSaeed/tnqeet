@@ -131,8 +131,8 @@ ngram_beam = {
     4: 30,
     6: 50,
     8: 60,
-    11: 90,
-    14: 100,
+    # 11: 90,
+    # 14: 100,
 }
 
 for ngrams, beam_size in ngram_beam.items():
