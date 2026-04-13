@@ -98,7 +98,7 @@ class DottingDataModule(pl.LightningDataModule):
         **kwargs,
     ):
         super().__init__()
-        self.save_hyperparameters()
+        self.save_hyperparameters(ignore=["tokenizer", "kwargs"])
 
         self.tokenizer = tokenizer
         self.max_length = max_length

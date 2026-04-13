@@ -5,19 +5,22 @@ def split_text_by_threshold(text, threshold=1024):
         return [text]
     results = []
     start_index = 0
-    end_index = threshold
     while start_index < len(text):
+        end_index = start_index + threshold
+        if end_index >= len(text):
+            results.append(text[start_index:])
+            break
+        # Try to split at the last space within the chunk.
         piece = text[start_index:end_index]
-        piece_last_space = piece.rfind(" ")
-        if piece_last_space != -1:
-            piece = piece[: piece_last_space + 1]
-        while end_index <= len(text) and not text[end_index - 1].isspace():
-            start_index += 1
-            end_index += 1
-        start_index += threshold
-        end_index += threshold
+        last_space = piece.rfind(" ")
+        if last_space != -1:
+            split_at = start_index + last_space + 1
+        else:
+            # No space found — hard cut at threshold.
+            split_at = end_index
         if piece.strip():
-            results.append(piece)
+            results.append(text[start_index:split_at])
+        start_index = split_at
     return results
 
 

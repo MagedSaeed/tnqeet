@@ -215,7 +215,7 @@ class LSTMDottingModel(pl.LightningModule):
         self,
         dotless_texts,
         tokenizer=None,
-        resolve_ambiguous_rasms_only=False,
+        resolve_ambiguous_rasms_only=True,
     ):
         self.eval()
         is_single_text = False

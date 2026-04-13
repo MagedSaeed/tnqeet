@@ -42,8 +42,6 @@ def evaluate_model(
         checkpoint_name = [c for c in os.listdir(checkpoints_dir) if c.startswith("epoch=")][0]
         model = LSTMDottingModel.load_from_checkpoint(
             checkpoint_path=os.path.join(checkpoints_dir, checkpoint_name),
-            weights_only=False,
-            # strict=False,
         )
     dotter = model
     if len(per_example_results) < len(dataset):
@@ -62,9 +60,7 @@ def evaluate_model(
             ):
                 partial_dotless_text = remove_dots(partial_dotted_text)
                 partial_predicted_dotted_text = dotter.restore_dots(partial_dotless_text)
-                predicted_dotted_text += partial_predicted_dotted_text.lstrip()  # type:ignore
-                if not predicted_dotted_text[-1].isspace():
-                    predicted_dotted_text += " "  # Ensure space at the end of each segment
+                predicted_dotted_text += partial_predicted_dotted_text  # type:ignore
             predicted_dotted_text = predicted_dotted_text.strip()
             time_after_prediction = datetime.now()
             dotting_time = time_after_prediction - time_before_prediction
