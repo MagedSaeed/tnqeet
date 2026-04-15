@@ -8,15 +8,8 @@ from tnqeet.evaluate.metrics import wer, cer, doer
 from tnqeet.dotting_models.sequence_labeling.models import LSTMDottingModel
 from tnqeet.dotting_models.sequence_labeling.utils import split_text_by_threshold
 
-
-def get_model():
-    checkpoints_dir = "tnqeet/dotting_models/sequence_labeling/trained_models/LSTM"
-    checkpoint_name = [c for c in os.listdir(checkpoints_dir) if c.startswith("epoch=")][0]
-    model = LSTMDottingModel.load_from_checkpoint(
-        checkpoint_path=os.path.join(checkpoints_dir, checkpoint_name),
-        strict=False,
-    )
-    return model
+MODEL_NAME = "LSTM"
+CHECKPOINTS_ROOT = "tnqeet/dotting_models/sequence_labeling/trained_models"
 
 
 def evaluate_model(
@@ -25,7 +18,7 @@ def evaluate_model(
     dataset_name="val_dataset",
     overwrite=True,
     save_every=5,
-    model_name="LSTM",
+    model_name=MODEL_NAME,
     n_layers=2,
 ):
     results_dir = f"tnqeet/dotting_models/sequence_labeling/evaluation_results/{dataset_name}"
@@ -38,12 +31,10 @@ def evaluate_model(
             per_example_results = json.load(f)
     # load the model
     if model is None:
-        checkpoints_dir = f"tnqeet/dotting_models/sequence_labeling/trained_models/LSTM/layers_{n_layers}"
+        checkpoints_dir = os.path.join(CHECKPOINTS_ROOT, MODEL_NAME, f"layers_{n_layers}")
         checkpoint_name = [c for c in os.listdir(checkpoints_dir) if c.startswith("epoch=")][0]
         model = LSTMDottingModel.load_from_checkpoint(
             checkpoint_path=os.path.join(checkpoints_dir, checkpoint_name),
-            weights_only=False,
-            # strict=False,
         )
     dotter = model
     if len(per_example_results) < len(dataset):
@@ -62,9 +53,7 @@ def evaluate_model(
             ):
                 partial_dotless_text = remove_dots(partial_dotted_text)
                 partial_predicted_dotted_text = dotter.restore_dots(partial_dotless_text)
-                predicted_dotted_text += partial_predicted_dotted_text.lstrip()  # type:ignore
-                if not predicted_dotted_text[-1].isspace():
-                    predicted_dotted_text += " "  # Ensure space at the end of each segment
+                predicted_dotted_text += partial_predicted_dotted_text  # type:ignore
             predicted_dotted_text = predicted_dotted_text.strip()
             time_after_prediction = datetime.now()
             dotting_time = time_after_prediction - time_before_prediction
