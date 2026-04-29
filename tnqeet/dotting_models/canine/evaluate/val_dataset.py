@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 from datetime import datetime
@@ -6,22 +7,25 @@ from tqdm.auto import tqdm
 
 from tnqeet import remove_dots
 from tnqeet.data import val_dataset
-from tnqeet.dotting_models.canine.models import CanineDottingModel
+from tnqeet.dotting_models.canine.models import CANINE_MODEL_NAME, CanineDottingModel
 from tnqeet.dotting_models.sequence_labeling.utils import split_text_by_threshold
 from tnqeet.evaluate.metrics import cer, doer, wer
 
 
-MODEL_NAME = "CANINE-canine-c"
 CHECKPOINTS_ROOT = "tnqeet/dotting_models/canine/trained_models"
+
+
+def run_name_from_model(model_name: str) -> str:
+    return f"CANINE-{model_name.split('/')[-1]}"
 
 
 def evaluate_model(
     model=None,
     dataset=val_dataset,
     dataset_name: str = "val_dataset",
-    overwrite: bool = True,
+    overwrite: bool = False,
     save_every: int = 5,
-    model_name: str = MODEL_NAME,
+    model_name: str = run_name_from_model(CANINE_MODEL_NAME),
 ):
     results_dir = f"tnqeet/dotting_models/canine/evaluation_results/{dataset_name}"
     os.makedirs(results_dir, exist_ok=True)
@@ -100,5 +104,10 @@ def evaluate_model(
 
 
 if __name__ == "__main__":
-    results = evaluate_model()
-    print(f"Summary for {MODEL_NAME}: {results}")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model_name", type=str, default=CANINE_MODEL_NAME)
+    args = parser.parse_args()
+
+    run_name = run_name_from_model(args.model_name)
+    results = evaluate_model(model_name=run_name)
+    print(f"Summary for {run_name}: {results}")
