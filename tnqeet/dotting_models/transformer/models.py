@@ -1,11 +1,24 @@
+import math
+
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 import torchmetrics
 from torch import nn
-from transformers import AutoTokenizer, get_linear_schedule_with_warmup
+from transformers import AutoTokenizer
 
 from tnqeet import constants
+
+
+def _sinusoidal_position_encoding(max_len: int, d_model: int) -> torch.Tensor:
+    pe = torch.zeros(max_len, d_model)
+    position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+    div_term = torch.exp(
+        torch.arange(0, d_model, 2, dtype=torch.float) * (-math.log(10000.0) / d_model)
+    )
+    pe[:, 0::2] = torch.sin(position * div_term)
+    pe[:, 1::2] = torch.cos(position * div_term)
+    return pe
 
 
 tnqeet_tokenizer = AutoTokenizer.from_pretrained(
@@ -15,6 +28,8 @@ tnqeet_tokenizer = AutoTokenizer.from_pretrained(
 
 
 class TransformerDottingModel(pl.LightningModule):
+    position_encoding: torch.Tensor
+
     def __init__(
         self,
         vocab_size=None,
@@ -26,10 +41,7 @@ class TransformerDottingModel(pl.LightningModule):
         num_layers=6,
         dim_feedforward=2048,
         dropout=0.1,
-        learning_rate=1e-4,
-        weight_decay=0.01,
-        warmup_ratio=0.1,
-        total_training_steps=100_000,
+        learning_rate=1e-3,
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -43,14 +55,15 @@ class TransformerDottingModel(pl.LightningModule):
         self.max_sequence_length = max_sequence_length
         self.d_model = d_model
         self.learning_rate = learning_rate
-        self.weight_decay = weight_decay
-        self.warmup_ratio = warmup_ratio
-        self.total_training_steps = total_training_steps
 
         self.token_embedding = nn.Embedding(
             vocab_size, d_model, padding_idx=pad_id
         )
-        self.position_embedding = nn.Embedding(max_sequence_length, d_model)
+        self.register_buffer(
+            "position_encoding",
+            _sinusoidal_position_encoding(max_sequence_length, d_model),
+            persistent=False,
+        )
         self.embedding_dropout = nn.Dropout(dropout)
 
         encoder_layer = nn.TransformerEncoderLayer(
@@ -62,7 +75,11 @@ class TransformerDottingModel(pl.LightningModule):
             batch_first=True,
             norm_first=True,
         )
-        self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        self.encoder = nn.TransformerEncoder(
+            encoder_layer,
+            num_layers=num_layers,
+            norm=nn.LayerNorm(d_model),  # final norm; pre-LN convention
+        )
         self.fc = nn.Linear(d_model, output_size)
 
         self.train_accuracy = torchmetrics.Accuracy(
@@ -77,8 +94,7 @@ class TransformerDottingModel(pl.LightningModule):
 
     def forward(self, input_ids):
         seq_len = input_ids.size(1)
-        positions = torch.arange(seq_len, device=input_ids.device).unsqueeze(0)
-        x = self.token_embedding(input_ids) + self.position_embedding(positions)
+        x = self.token_embedding(input_ids) + self.position_encoding[:seq_len]
         x = self.embedding_dropout(x)
         # True at pad positions -> masked out of attention.
         pad_mask = input_ids == self.pad_id
@@ -124,29 +140,19 @@ class TransformerDottingModel(pl.LightningModule):
         return predictions, labels
 
     def configure_optimizers(self):  # type: ignore
-        no_decay = ("bias", "LayerNorm.weight", "norm.weight")
-        decay_params = [
-            p for n, p in self.named_parameters() if not any(nd in n for nd in no_decay)
-        ]
-        no_decay_params = [
-            p for n, p in self.named_parameters() if any(nd in n for nd in no_decay)
-        ]
-        optimizer = torch.optim.AdamW(
-            [
-                {"params": decay_params, "weight_decay": self.weight_decay},
-                {"params": no_decay_params, "weight_decay": 0.0},
-            ],
+        optimizer = torch.optim.Adam(
+            self.parameters(),
             lr=self.learning_rate,
         )
-        warmup_steps = int(self.total_training_steps * self.warmup_ratio)
-        scheduler = get_linear_schedule_with_warmup(
-            optimizer,
-            num_warmup_steps=warmup_steps,
-            num_training_steps=self.total_training_steps,
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer=optimizer,
+            factor=0.5,
+            patience=2,
         )
         return {
             "optimizer": optimizer,
-            "lr_scheduler": {"scheduler": scheduler, "interval": "step"},
+            "lr_scheduler": scheduler,
+            "monitor": "val_loss",
         }
 
     @torch.no_grad()

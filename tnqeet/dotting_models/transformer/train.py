@@ -1,5 +1,4 @@
 import argparse
-import math
 import os
 
 from pytorch_lightning.loggers import WandbLogger
@@ -35,16 +34,12 @@ else:
     datamodule = TransformerDottingDataModule(batch_size=args.batch_size)
     datamodule.setup()
 
-    steps_per_epoch = math.ceil(len(datamodule.train_data) / args.batch_size)  # type: ignore
-    total_training_steps = steps_per_epoch * args.max_epochs
-
     model = TransformerDottingModel(
         vocab_size=datamodule.tokenizer.vocab_size,
         output_size=datamodule.tokenizer.vocab_size,
         pad_id=datamodule.tokenizer.pad_token_id,  # type: ignore
         max_sequence_length=datamodule.max_length,
         num_layers=args.num_layers,
-        total_training_steps=total_training_steps,
     )
 
     trainer, checkpoint_path = get_trainer(
