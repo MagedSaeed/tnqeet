@@ -6,52 +6,7 @@ import kenlm
 from tnqeet.data import val_dataset
 from tnqeet import remove_dots
 from tnqeet.evaluate.metrics import wer, cer, doer
-from tnqeet import constants
-from collections import defaultdict
-
-
-def to_chars(text):
-    chars = list()
-    for c in text:
-        if c.isspace():
-            chars.append("<SPACE>")
-        else:
-            chars.append(c)
-    chars = " ".join(chars)
-    return chars
-
-
-class NgramDotter:
-    def __init__(self, model, beam_size: int = 10):
-        self.model = model
-        self.beam_size = beam_size
-        # Create reverse mapping from rasm to original letters
-        self.rasm_to_letters = defaultdict(list)
-        for dotted_letter, rasm in constants.LETTERS_MAPPING.items():
-            self.rasm_to_letters[rasm].append(dotted_letter)
-        # self.rasm_to_letters[constants.NOON_RASM] += ["ن"]
-        # self.rasm_to_letters[constants.BAA_RASM] += ["ي"]
-        # self.rasm_to_letters[constants.QAF_RASM] += ["ق"]
-        # yaa can be mapped to baa if it comes in the beginning of a word.
-        # self.rasm_to_letters[constants.YAA_RASM] += ["ب"]
-        # convert back to dict
-        self.rasm_to_letters = dict(self.rasm_to_letters)
-
-    def restore_dots(self, dotless_text: str) -> str:
-        tokens = to_chars(dotless_text)
-        beam = [([], 0.0)]
-        for char in tokens.split():
-            new_beam = []
-            candidates = self.rasm_to_letters.get(char, [char])
-            for sequence, score in beam:
-                for candidate in candidates:
-                    new_sequence = sequence + [candidate]
-                    context = " ".join(new_sequence).strip()
-                    new_score = score + self.model.score(context, bos=len(sequence) == 0)
-                    new_beam.append((new_sequence, new_score))
-            beam = sorted(new_beam, key=lambda x: x[1], reverse=True)[: self.beam_size]
-        best_sequence = max(beam, key=lambda x: x[1])[0]
-        return "".join(best_sequence).replace(" ", "").replace("<SPACE>", " ")
+from tnqeet.dotting_models.ngrams.models import NgramDotter
 
 
 def evaluate_model(
@@ -71,6 +26,7 @@ def evaluate_model(
         with open(results_file, "r", encoding="utf-8") as f:
             per_example_results = json.load(f)
     model = kenlm.LanguageModel(f"tnqeet/dotting_models/ngrams/trained_models/ngrams_{ngrams}.binary")
+    dotter = NgramDotter(model=model, beam_size=beam_size)
     if len(per_example_results) < len(dataset):
         for i, example in tqdm(
             enumerate(dataset.select(range(len(per_example_results), len(dataset)))),
@@ -80,7 +36,6 @@ def evaluate_model(
         ):
             original_dotted_text = example["text"]  # type:ignore
             dotless_text = remove_dots(original_dotted_text)
-            dotter = NgramDotter(model=model, beam_size=beam_size)
             time_before_prediction = datetime.now()
             predicted_dotted_text = dotter.restore_dots(dotless_text)
             time_after_prediction = datetime.now()
