@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 from datetime import datetime
@@ -103,6 +104,20 @@ def evaluate_model(
 
 
 if __name__ == "__main__":
-    for n_layers in [3, 6, 9, 12]:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--n_layers", type=int, default=None)
+    args = parser.parse_args()
+
+    if args.n_layers is None:
+        model_dir = os.path.join(CHECKPOINTS_ROOT, MODEL_NAME)
+        layers_to_run = sorted(
+            int(d.replace("layers_", ""))
+            for d in os.listdir(model_dir)
+            if d.startswith("layers_") and os.path.isdir(os.path.join(model_dir, d))
+        )
+    else:
+        layers_to_run = [args.n_layers]
+
+    for n_layers in layers_to_run:
         results = evaluate_model(n_layers=n_layers)
         print(f"Summary for Transformer with {n_layers} layers: {results}")

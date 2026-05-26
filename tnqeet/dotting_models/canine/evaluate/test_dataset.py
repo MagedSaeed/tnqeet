@@ -104,9 +104,17 @@ def evaluate_model(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_name", type=str, default=CANINE_MODEL_NAME)
+    parser.add_argument("--model_name", type=str, default=None)
     args = parser.parse_args()
 
-    run_name = run_name_from_model(args.model_name)
-    results = evaluate_model(model_name=run_name)
-    print(f"Summary for {run_name}: {results}")
+    if args.model_name is None:
+        run_names = sorted(
+            d for d in os.listdir(CHECKPOINTS_ROOT)
+            if os.path.isdir(os.path.join(CHECKPOINTS_ROOT, d))
+        )
+    else:
+        run_names = [run_name_from_model(args.model_name)]
+
+    for run_name in run_names:
+        results = evaluate_model(model_name=run_name)
+        print(f"Summary for {run_name}: {results}")

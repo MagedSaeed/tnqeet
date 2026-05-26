@@ -41,7 +41,8 @@ class TransformerDottingModel(pl.LightningModule):
         num_layers=6,
         dim_feedforward=2048,
         dropout=0.1,
-        learning_rate=1e-3,
+        learning_rate=3e-4,
+        warmup_steps=4000,
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -55,6 +56,7 @@ class TransformerDottingModel(pl.LightningModule):
         self.max_sequence_length = max_sequence_length
         self.d_model = d_model
         self.learning_rate = learning_rate
+        self.warmup_steps = warmup_steps
 
         self.token_embedding = nn.Embedding(
             vocab_size, d_model, padding_idx=pad_id
@@ -79,6 +81,7 @@ class TransformerDottingModel(pl.LightningModule):
             encoder_layer,
             num_layers=num_layers,
             norm=nn.LayerNorm(d_model),  # final norm; pre-LN convention
+            enable_nested_tensor=False, # no need for nested tensors optimization as we are using norm_first=True
         )
         self.fc = nn.Linear(d_model, output_size)
 
@@ -140,19 +143,25 @@ class TransformerDottingModel(pl.LightningModule):
         return predictions, labels
 
     def configure_optimizers(self):  # type: ignore
-        optimizer = torch.optim.Adam(
+        optimizer = torch.optim.AdamW(
             self.parameters(),
             lr=self.learning_rate,
+            betas=(0.9, 0.98),
+            eps=1e-6,
+            weight_decay=0.01,
         )
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer=optimizer,
-            factor=0.5,
-            patience=2,
-        )
+        warmup_steps = self.warmup_steps
+
+        def lr_lambda(step: int) -> float:
+            step = max(1, step)
+            if step < warmup_steps:
+                return step / warmup_steps
+            return (warmup_steps / step) ** 0.5
+
+        scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
         return {
             "optimizer": optimizer,
-            "lr_scheduler": scheduler,
-            "monitor": "val_loss",
+            "lr_scheduler": {"scheduler": scheduler, "interval": "step"},
         }
 
     @torch.no_grad()
