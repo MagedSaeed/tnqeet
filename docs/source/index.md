@@ -16,7 +16,7 @@ overview
 CHANGELOG
 CONTRIBUTING
 License <https://raw.githubusercontent.com/allenai/tnqeet/main/LICENSE>
-GitHub Repository <https://github.com/MagedSaeed/tnqeet>
+GitHub Repository <https://github.com/anonymous/tnqeet>
 ```
 
 ## Indices and tables

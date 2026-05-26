@@ -46,9 +46,9 @@ dependencies = [
 license = {file = "LICENSE"}
 
 [project.urls]
-Homepage = "https://github.com/MagedSaeed/tnqeet"
-Repository = "https://github.com/MagedSaeed/tnqeet"
-Changelog = "https://github.com/MagedSaeed/tnqeet/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/anonymous/tnqeet"
+Repository = "https://github.com/anonymous/tnqeet"
+Changelog = "https://github.com/anonymous/tnqeet/blob/main/CHANGELOG.md"
 # Documentation = "https://tnqeet.readthedocs.io/"
 
 [project.optional-dependencies]

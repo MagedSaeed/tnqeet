@@ -22,7 +22,7 @@ def _sinusoidal_position_encoding(max_len: int, d_model: int) -> torch.Tensor:
 
 
 tnqeet_tokenizer = AutoTokenizer.from_pretrained(
-    "MagedSaeed/tnqeet-tokenizer",
+    "anonymous/tnqeet-tokenizer",
     trust_remote_code=True,
 )
 

@@ -7,7 +7,7 @@ from tqdm.auto import tqdm
 
 # Dataset configurations with text column mapping and processing functions
 DATASETS = {
-    "wasm": ("MagedSaeed/wasm", "Tweet", None),
+    "wasm": ("anonymous/wasm", "Tweet", None),
     "iwslt": (("iwslt2017", "iwslt2017-ar-en"), "translation", lambda x: x["ar"]),
     "ashaar": ("arbml/ashaar", "poem verses", lambda x: "، ".join(x) if isinstance(x, list) else str(x)), 
     "tashkeela": ("asas-ai/Tashkeela", "text", None),
@@ -132,7 +132,7 @@ def standardize_tashkeela(ds, minimum_words_threshold=10):
     
     return Dataset.from_list(final_samples)
 
-def main(hf_repo_name="MagedSaeed/tnqeet-training-datasets", push_to_hub=True):
+def main(hf_repo_name="anonymous/tnqeet-training-datasets", push_to_hub=True):
     print("Loading datasets...")
     
     # Load and process all datasets
@@ -203,6 +203,6 @@ def main(hf_repo_name="MagedSaeed/tnqeet-training-datasets", push_to_hub=True):
 
 if __name__ == "__main__":
     # Modify these parameters as needed
-    HF_REPO_NAME = "MagedSaeed/tnqeet-training-datasets"  # Change this to your desired repo name
+    HF_REPO_NAME = "anonymous/tnqeet-training-datasets"  # Change this to your desired repo name
     
     main(hf_repo_name=HF_REPO_NAME, push_to_hub=True)

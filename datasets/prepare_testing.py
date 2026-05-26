@@ -194,7 +194,7 @@ def sample_datasets(datasets, n_samples=500):
     
     return sampled_datasets
 
-def main(hf_repo_name="MagedSaeed/tnqeet-testing-datasets", push_to_hub=True, n_samples=500):
+def main(hf_repo_name="anonymous/tnqeet-testing-datasets", push_to_hub=True, n_samples=500):
     print("Loading test datasets...")
     
     # Load all datasets
@@ -277,7 +277,7 @@ def main(hf_repo_name="MagedSaeed/tnqeet-testing-datasets", push_to_hub=True, n_
 
 if __name__ == "__main__":
     # Parameters - modify as needed
-    HF_REPO_NAME = "MagedSaeed/tnqeet-testing-datasets"  # Using your username
+    HF_REPO_NAME = "anonymous/tnqeet-testing-datasets"  # Using your username
     N_SAMPLES = 500  # Number of samples to take from each dataset
     
     main(hf_repo_name=HF_REPO_NAME, push_to_hub=True, n_samples=N_SAMPLES)

@@ -13,10 +13,10 @@ pip install tnqeet
 
 ## Installing from source
 
-To install **tnqeet** from source, first clone [the repository](https://github.com/MagedSaeed/tnqeet):
+To install **tnqeet** from source, first clone [the repository](https://github.com/anonymous/tnqeet):
 
 ```bash
-git clone https://github.com/MagedSaeed/tnqeet.git
+git clone https://github.com/anonymous/tnqeet.git
 cd tnqeet
 ```
 

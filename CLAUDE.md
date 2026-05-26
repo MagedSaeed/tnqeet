@@ -44,8 +44,8 @@ Uses DSPy framework with large language models (Claude, GPT) via OpenRouter:
 - [constants.py](tnqeet/constants.py): Arabic letter mappings (`LETTERS_MAPPING`), Rasm definitions, Unicode normalization tables
 - [__init__.py](tnqeet/__init__.py): `remove_dots()` function - core utility to convert dotted text to Rasm
 - [data/__init__.py](tnqeet/data/__init__.py): Dataset loading from HuggingFace Hub
-  - `train_dataset`: MagedSaeed/tnqeet-training-datasets
-  - `test_dataset`: MagedSaeed/tnqeet-testing-datasets
+  - `train_dataset`: anonymous/tnqeet-training-datasets
+  - `test_dataset`: anonymous/tnqeet-testing-datasets
   - `val_dataset` and `fewshot_val_dataset`: Stratified validation splits
 - [evaluate/metrics.py](tnqeet/evaluate/metrics.py): Evaluation metrics (`wer`, `cer`, `doer`)
   - WER: Word Error Rate
@@ -57,7 +57,7 @@ Uses DSPy framework with large language models (Claude, GPT) via OpenRouter:
 The project uses a custom tokenizer from HuggingFace Hub:
 ```python
 from transformers import AutoTokenizer
-tokenizer = AutoTokenizer.from_pretrained("MagedSaeed/tnqeet-tokenizer", trust_remote_code=True)
+tokenizer = AutoTokenizer.from_pretrained("anonymous/tnqeet-tokenizer", trust_remote_code=True)
 ```
 
 ## Development Commands

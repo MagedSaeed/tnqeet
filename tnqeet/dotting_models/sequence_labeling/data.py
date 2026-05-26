@@ -12,7 +12,7 @@ from transformers import AutoTokenizer
 # train_dataset = train_dataset.select(range(50_000))  # type:ignore
 
 tnqeet_tokenizer = AutoTokenizer.from_pretrained(
-    "MagedSaeed/tnqeet-tokenizer",
+    "anonymous/tnqeet-tokenizer",
     trust_remote_code=True,
 )
 

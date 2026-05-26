@@ -9,7 +9,7 @@ DO_PUSH = False
 
 if DO_TRAIN:
     tokenizer = AutoTokenizer.from_pretrained(
-        "MagedSaeed/APCD-Plus-meter-classification-model",
+        "anonymous/APCD-Plus-meter-classification-model",
         trust_remote_code=True,
     )
 
@@ -29,15 +29,15 @@ if DO_TRAIN:
 
 else:
     tokenizer = AutoTokenizer.from_pretrained(
-        "MagedSaeed/tnqeet-tokenizer",
+        "anonymous/tnqeet-tokenizer",
         trust_remote_code=True,
     )
 
 print("vocab size after training:", tokenizer.vocab_size)
 
 # do not forget to push this file to the hub too:
-# https://huggingface.co/MagedSaeed/APCD-Plus-meter-classification-model/blob/main/tokenizer_script.py
+# https://huggingface.co/anonymous/APCD-Plus-meter-classification-model/blob/main/tokenizer_script.py
 
 if DO_PUSH:
     tokenizer.register_for_auto_class(auto_class="AutoTokenizer")
-    tokenizer.push_to_hub("MagedSaeed/tnqeet-tokenizer")
+    tokenizer.push_to_hub("anonymous/tnqeet-tokenizer")

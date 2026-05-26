@@ -8,7 +8,7 @@ import torchmetrics
 
 
 tnqeet_tokenizer = AutoTokenizer.from_pretrained(
-    "MagedSaeed/tnqeet-tokenizer",
+    "anonymous/tnqeet-tokenizer",
     trust_remote_code=True,
 )
 
