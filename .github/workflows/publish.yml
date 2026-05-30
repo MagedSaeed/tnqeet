@@ -1,0 +1,31 @@
+name: Publish to PyPI
+
+# Publishes tnqeet to PyPI when a version tag (e.g. v0.1.0) is pushed.
+#
+# Uses PyPI Trusted Publishing (OIDC) — no API token needed. Configure a
+# trusted publisher for this repo/workflow at https://pypi.org/manage/account/publishing/
+# (set workflow name to "publish.yml"). To use a token instead, delete the
+# `permissions: id-token` block and set the UV_PUBLISH_TOKEN env/secret on `uv publish`.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  publish:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # required for PyPI Trusted Publishing
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Build distributions
+        run: uv build
+
+      - name: Publish to PyPI
+        run: uv publish

@@ -63,35 +63,38 @@ tokenizer = AutoTokenizer.from_pretrained("MagedSaeed/tnqeet-tokenizer", trust_r
 ## Development Commands
 
 ### Environment Setup
+
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management and
+packaging.
+
 ```bash
-# Install in editable mode with dev dependencies
-pip install -U pip setuptools wheel
-pip install -e .[dev]
+# Create the environment and install the project + dev dependency group
+uv sync
 ```
 
 ### Code Quality
 
 ```bash
 # Format code
-isort .
-black .
+uv run isort .
+uv run black .
 
 # Lint and type-check
-ruff check .
-mypy .
+uv run ruff check .
+uv run mypy .
 ```
 
 ### Testing
 
 ```bash
 # Run all tests
-pytest
+uv run pytest
 
 # Run specific test file
-pytest -v tests/hello_test.py
+uv run pytest -v tests/hello_test.py
 
 # Run with coverage
-pytest --cov=tnqeet tests/
+uv run pytest --cov=tnqeet tests/
 ```
 
 ### Training Models
@@ -133,14 +136,19 @@ python tnqeet/dotting_models/llms/evaluate/test_dataset.py
 
 Evaluation scripts save results as JSON files with per-example predictions and metrics.
 
-### Documentation
+### Building and Publishing
 
 ```bash
-# Build documentation
-make docs
+# Build sdist + wheel into dist/
+uv build
 
-# The documentation uses Sphinx with autodoc extension
+# Publish to PyPI (CI does this automatically on a v*.*.* tag)
+uv publish
 ```
+
+To release: bump `version` in `pyproject.toml`, commit, then push a matching
+`vX.Y.Z` tag. The `.github/workflows/publish.yml` workflow builds and publishes
+to PyPI via Trusted Publishing.
 
 ## Model Inference API
 
