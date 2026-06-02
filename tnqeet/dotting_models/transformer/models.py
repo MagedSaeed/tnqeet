@@ -8,6 +8,7 @@ from torch import nn
 from transformers import AutoTokenizer
 
 from tnqeet import constants
+from tnqeet.weights import resolve_weight
 
 
 def _sinusoidal_position_encoding(max_len: int, d_model: int) -> torch.Tensor:
@@ -94,6 +95,18 @@ class TransformerDottingModel(pl.LightningModule):
         self.test_accuracy = torchmetrics.Accuracy(
             task="multiclass", num_classes=output_size, ignore_index=pad_id
         )
+
+    @classmethod
+    def from_pretrained(cls, size=None, revision=None, weights_dir=None, **kwargs):
+        """Load a pretrained Transformer dotter by friendly size (e.g. ``"6L"``).
+
+        Downloads the checkpoint from the Hugging Face Hub on demand, or reads
+        from a local ``trained_models`` tree when ``weights_dir`` is given.
+        """
+        checkpoint_path = resolve_weight(
+            "transformer", size=size, revision=revision, weights_dir=weights_dir
+        )
+        return cls.load_from_checkpoint(checkpoint_path, **kwargs)
 
     def forward(self, input_ids):
         seq_len = input_ids.size(1)

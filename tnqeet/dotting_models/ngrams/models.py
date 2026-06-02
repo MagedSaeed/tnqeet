@@ -4,6 +4,7 @@ from collections import defaultdict
 import kenlm
 
 from tnqeet import constants
+from tnqeet.weights import resolve_weight
 
 
 def to_chars(text):
@@ -40,6 +41,20 @@ class NgramDotter:
         for dotted_letter, rasm in constants.LETTERS_MAPPING.items():
             self.rasm_to_letters[rasm].append(dotted_letter)
         self.rasm_to_letters = dict(self.rasm_to_letters)
+
+    @classmethod
+    def from_pretrained(
+        cls, order=None, beam_size: int = 10, revision=None, weights_dir=None
+    ):
+        """Load a pretrained KenLM n-gram dotter by order (e.g. ``6``).
+
+        Downloads the binary from the Hugging Face Hub on demand, or reads from
+        a local ``trained_models`` tree when ``weights_dir`` is given.
+        """
+        binary_path = resolve_weight(
+            "ngram", size=order, revision=revision, weights_dir=weights_dir
+        )
+        return cls(model=kenlm.LanguageModel(binary_path), beam_size=beam_size)
 
     def _initial_state(self) -> kenlm.State:
         state = kenlm.State()

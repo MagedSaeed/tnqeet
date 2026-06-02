@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import pytorch_lightning as pl
 from transformers import AutoTokenizer
 from tnqeet import constants
+from tnqeet.weights import resolve_weight
 import torchmetrics
 
 
@@ -80,6 +81,18 @@ class LSTMDottingModel(pl.LightningModule):
 
         # Linear layer for output
         self.fc = nn.Linear(hidden_size, output_size)
+
+    @classmethod
+    def from_pretrained(cls, size=None, revision=None, weights_dir=None, **kwargs):
+        """Load a pretrained LSTM dotter by friendly size (e.g. ``"4L"``).
+
+        Downloads the checkpoint from the Hugging Face Hub on demand, or reads
+        from a local ``trained_models`` tree when ``weights_dir`` is given.
+        """
+        checkpoint_path = resolve_weight(
+            "lstm", size=size, revision=revision, weights_dir=weights_dir
+        )
+        return cls.load_from_checkpoint(checkpoint_path, **kwargs)
 
     def forward(self, inputs):
         outputs = self.embedding(inputs)

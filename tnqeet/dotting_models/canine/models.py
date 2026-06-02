@@ -8,6 +8,7 @@ from torch import nn
 from transformers import CanineModel, CanineTokenizer, get_linear_schedule_with_warmup
 
 from tnqeet import constants
+from tnqeet.weights import resolve_weight
 
 
 CANINE_MODEL_NAME = "google/canine-c"
@@ -100,6 +101,18 @@ class CanineDottingModel(pl.LightningModule):
         self.test_accuracy = torchmetrics.Accuracy(
             task="multiclass", num_classes=num_labels, ignore_index=pad_label_id
         )
+
+    @classmethod
+    def from_pretrained(cls, size=None, revision=None, weights_dir=None, **kwargs):
+        """Load a pretrained CANINE dotter by friendly size (``"c"`` or ``"s"``).
+
+        Downloads the checkpoint from the Hugging Face Hub on demand, or reads
+        from a local ``trained_models`` tree when ``weights_dir`` is given.
+        """
+        checkpoint_path = resolve_weight(
+            "canine", size=size, revision=revision, weights_dir=weights_dir
+        )
+        return cls.load_from_checkpoint(checkpoint_path, **kwargs)
 
     def forward(self, input_ids, attention_mask=None):
         outputs = self.backbone(input_ids=input_ids, attention_mask=attention_mask)
