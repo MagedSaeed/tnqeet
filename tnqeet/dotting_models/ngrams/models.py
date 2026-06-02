@@ -1,10 +1,25 @@
 import heapq
 from collections import defaultdict
 
-import kenlm
-
 from tnqeet import constants
 from tnqeet.weights import resolve_weight
+
+_KENLM_INSTALL_HINT = (
+    "The n-gram dotter requires KenLM, which is not installed by default because "
+    "it compiles from source. Install it with:\n\n"
+    '    MAX_ORDER=8 pip install "git+https://github.com/kpu/kenlm.git"\n\n'
+    "MAX_ORDER must be >= the n-gram order you load (orders up to 8 are "
+    "published). See the tnqeet README for details."
+)
+
+
+def _import_kenlm():
+    """Import KenLM lazily, raising a helpful error if it is missing."""
+    try:
+        import kenlm
+    except ImportError as e:
+        raise ImportError(_KENLM_INSTALL_HINT) from e
+    return kenlm
 
 
 def to_chars(text):
@@ -35,6 +50,7 @@ class NgramDotter:
     """
 
     def __init__(self, model, beam_size: int = 10):
+        self._kenlm = _import_kenlm()
         self.model = model
         self.beam_size = beam_size
         self.rasm_to_letters = defaultdict(list)
@@ -51,13 +67,14 @@ class NgramDotter:
         Downloads the binary from the Hugging Face Hub on demand, or reads from
         a local ``trained_models`` tree when ``weights_dir`` is given.
         """
+        kenlm = _import_kenlm()
         binary_path = resolve_weight(
             "ngram", size=order, revision=revision, weights_dir=weights_dir
         )
         return cls(model=kenlm.LanguageModel(binary_path), beam_size=beam_size)
 
-    def _initial_state(self) -> kenlm.State:
-        state = kenlm.State()
+    def _initial_state(self):
+        state = self._kenlm.State()
         self.model.BeginSentenceWrite(state)
         return state
 
@@ -72,7 +89,7 @@ class NgramDotter:
             new_beam = []
             for score, sequence, state in beam:
                 for candidate in candidates:
-                    out_state = kenlm.State()
+                    out_state = self._kenlm.State()
                     delta = self.model.BaseScore(state, candidate, out_state)
                     new_beam.append((score + delta, sequence + [candidate], out_state))
 

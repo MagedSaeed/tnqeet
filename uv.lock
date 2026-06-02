@@ -4678,7 +4678,6 @@ dependencies = [
     { name = "ipython", version = "8.38.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
     { name = "ipython", version = "9.9.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "jiwer" },
-    { name = "kenlm" },
     { name = "matplotlib", version = "3.9.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "matplotlib", version = "3.10.8", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "matplotlib-inline" },
@@ -4704,6 +4703,7 @@ dependencies = [
 dev = [
     { name = "black" },
     { name = "isort" },
+    { name = "kenlm" },
     { name = "mypy" },
     { name = "pytest", version = "8.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "pytest", version = "9.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
@@ -4719,7 +4719,6 @@ requires-dist = [
     { name = "dspy", specifier = "~=2.6" },
     { name = "ipython", specifier = ">=8.18.1" },
     { name = "jiwer", specifier = "~=3.1" },
-    { name = "kenlm", git = "https://github.com/kpu/kenlm" },
     { name = "matplotlib", specifier = ">=3.9.4" },
     { name = "matplotlib-inline", specifier = ">=0.2.1" },
     { name = "peft", specifier = ">=0.14.0" },
@@ -4740,6 +4739,7 @@ requires-dist = [
 dev = [
     { name = "black", specifier = ">=23.0,<25.0" },
     { name = "isort", specifier = ">=5.12,<5.14" },
+    { name = "kenlm", git = "https://github.com/kpu/kenlm" },
     { name = "mypy", specifier = ">=1.0,<2.0" },
     { name = "pytest" },
     { name = "pytest-cov" },

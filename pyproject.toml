@@ -30,7 +30,6 @@ dependencies = [
     "seaborn~=0.13",
     "sentencepiece~=0.2",
     "matplotlib-inline>=0.2.1",
-    "kenlm",
     "transformers[torch]~=4.52",
     "pytorch-lightning>=2.6.0",
     "torchmetrics>=1.8.2",
@@ -56,6 +55,11 @@ dev = [
     "isort>=5.12,<5.14",
     "pytest",
     "pytest-cov",
+    # kenlm for the n-gram dotter. It compiles from source and is NOT a
+    # runtime dependency of the published package — if you want to use
+    # n-gram, install kenlm first (see README). Kept here so local
+    # dev/eval works via `uv sync`.
+    "kenlm",
 ]
 
 [tool.setuptools.packages.find]

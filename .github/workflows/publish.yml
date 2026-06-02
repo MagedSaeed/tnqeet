@@ -2,10 +2,9 @@ name: Publish to PyPI
 
 # Publishes tnqeet to PyPI when a version tag (e.g. v0.1.0) is pushed.
 #
-# Uses PyPI Trusted Publishing (OIDC) — no API token needed. Configure a
-# trusted publisher for this repo/workflow at https://pypi.org/manage/account/publishing/
-# (set workflow name to "publish.yml"). To use a token instead, delete the
-# `permissions: id-token` block and set the UV_PUBLISH_TOKEN env/secret on `uv publish`.
+# Authenticates with a PyPI API token stored as the repository secret
+# PYPI_API_TOKEN (Settings -> Secrets and variables -> Actions). uv reads it
+# from UV_PUBLISH_TOKEN and uploads as the implicit "__token__" user.
 
 on:
   push:
@@ -16,8 +15,6 @@ jobs:
   publish:
     name: Build and publish
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write # required for PyPI Trusted Publishing
     steps:
       - uses: actions/checkout@v4
 
@@ -28,4 +25,6 @@ jobs:
         run: uv build
 
       - name: Publish to PyPI
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
         run: uv publish
