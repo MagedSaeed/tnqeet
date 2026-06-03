@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tnqeet"
-version = "0.1.0"
+version = "0.1.1"
 description = "Arabic text diacritization (dotting) library: restoring dots to undotted Arabic Rasm."
 readme = "README.md"
 requires-python = ">=3.9,<3.13"
