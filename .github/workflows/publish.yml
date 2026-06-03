@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # full history + tags so setuptools-scm can derive the version
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6

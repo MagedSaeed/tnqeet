@@ -1,10 +1,12 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=61", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "tnqeet"
-version = "0.1.1"
+# Version is derived from the latest git tag by setuptools-scm; see
+# [tool.setuptools_scm] below. Release by tagging vX.Y.Z — do not hardcode here.
+dynamic = ["version"]
 description = "Arabic text diacritization (dotting) library: restoring dots to undotted Arabic Rasm."
 readme = "README.md"
 requires-python = ">=3.9,<3.13"
@@ -70,6 +72,12 @@ exclude = [
 
 [tool.setuptools.package-data]
 tnqeet = ["py.typed"]
+
+[tool.setuptools_scm]
+# Version comes from git tags (vX.Y.Z). Untagged commits get a dev version
+# like 0.1.1.post1.devN+g<sha>. fallback_version is used when building outside
+# a git checkout (e.g. from an sdist that lacks .git).
+fallback_version = "0.0.0"
 
 [tool.black]
 line-length = 100

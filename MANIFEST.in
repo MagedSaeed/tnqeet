@@ -1,0 +1,26 @@
+# setuptools-scm defaults the sdist to "all git-tracked files", which would pull
+# in evaluation results, notebooks, figures, and trained-model artifacts. Prune
+# everything that is not the importable package.
+
+# Keep top-level project metadata.
+include README.md LICENSE pyproject.toml
+
+# Drop non-package trees entirely.
+prune tnqeet_scripts
+prune datasets
+prune tests
+
+# Drop bulky / non-runtime artifacts wherever they live under the package.
+recursive-exclude tnqeet *.ipynb
+recursive-exclude tnqeet *.json
+recursive-exclude tnqeet *.pdf
+recursive-exclude tnqeet *.binary
+recursive-exclude tnqeet *.ckpt
+prune tnqeet/dotting_models/*/evaluation_results
+prune tnqeet/dotting_models/*/ablation_results
+prune tnqeet/dotting_models/*/visualization_figures
+prune tnqeet/dotting_models/*/trained_models
+prune tnqeet/dotting_models/*/training_logs
+prune tnqeet/dotting_models/llms/ablations
+prune tnqeet/dotting_models/ngrams/test_results_kenlm_output
+prune tnqeet/notebooks
