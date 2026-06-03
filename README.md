@@ -1,11 +1,25 @@
 # tnqeet
 
-Arabic text diacritization (dotting) library. **tnqeet** restores dots to
-undotted Arabic text (*Rasm*), where multiple letters share the same basic
-shape without diacritical marks — for example `ب ت ث ن` all collapse to the
-same dotless form.
+**tnqeet** is an Arabic dots restoration (*dotting*) library. It restores dots
+to dotless Arabic text (*Rasm*), where several letters collapse to the same
+basic shape once their dots are removed — for example `ب ت ث` all share one
+dotless form. Restoring the dots requires resolving this ambiguity from context.
 
-The library implements and evaluates several approaches to the dotting problem:
+For instance, the dotted sentence:
+
+```
+لسان الفتى شطر وشطر فؤاده
+```
+
+has the dotless (Rasm) form:
+
+```
+لساں الڡٮى سطر وسطر ڡواده
+```
+
+and the dotting task is to recover the former from the latter.
+
+The library implements and evaluates several approaches to dotting:
 sequence-labeling (BiLSTM), Transformer, CANINE, n-gram language models (KenLM),
 and LLM-based models.
 
@@ -16,83 +30,122 @@ pip install tnqeet
 ```
 
 This installs everything needed for the neural dotters (BiLSTM, Transformer,
-CANINE). The **n-gram** method additionally needs KenLM, which is not installed
-automatically because it compiles from source — see
-[N-gram method (KenLM)](#n-gram-method-kenlm) below.
+CANINE). The **n-gram** method additionally requires KenLM, which is not
+installed automatically because it compiles from source — see
+[N-gram method (KenLM)](#n-gram-method-kenlm).
 
 ## Usage
 
-Convert dotted text to *Rasm*:
+### Remove dots
+
+Convert dotted Arabic text to its dotless *Rasm* form:
 
 ```python
 from tnqeet import remove_dots
 
-remove_dots("لسان الفتى شطر وشطر فؤاده")  # -> dotless (Rasm) form
+remove_dots("لسان الفتى شطر وشطر فؤاده")
+# -> "لساں الڡٮى سطر وسطر ڡواده"
 ```
 
-Restore dots with a pretrained model. Weights are downloaded from the Hugging
-Face Hub on first use and cached locally:
+### Restore dots
+
+Load a pretrained model and restore the dots. Weights are downloaded from the
+Hugging Face Hub on first use and cached locally:
 
 ```python
 from tnqeet.dotting_models.transformer.models import TransformerDottingModel
 
-model = TransformerDottingModel.from_pretrained()        # default size (6L)
-model.restore_dots("لسٮٯ الڡٮ９ سطر وسطر ڡؤاده")
+model = TransformerDottingModel.from_pretrained()  # default size (6L)
+
+model.restore_dots("لساں الڡٮى سطر وسطر ڡواده")
+# -> "لسان الفتى شطر وشطر فؤاده"
 ```
 
-Each method exposes `from_pretrained` with friendly size keys:
+`restore_dots` accepts a single string (returns a string) or a list of strings
+(returns a list).
 
-| Method | Class | Sizes (default in bold) |
+### Available models
+
+Each method exposes `from_pretrained(size)` with friendly size keys (the default
+is used when no size is given):
+
+| Method | Class | Sizes (default in **bold**) |
 | --- | --- | --- |
 | BiLSTM | `LSTMDottingModel` | `1L`–`6L` (**`4L`**) |
 | Transformer | `TransformerDottingModel` | `3L`, **`6L`**, `9L`, `12L` |
 | CANINE | `CanineDottingModel` | `c`, **`s`** |
 | n-gram | `NgramDotter` | order `2`–`8` (**`6`**) |
 
+```python
+from tnqeet.dotting_models.canine.models import CanineDottingModel
+
+model = CanineDottingModel.from_pretrained("c")   # pick a specific size
+```
+
+The three neural models are PyTorch modules; move them to a GPU with the usual
+`.to("cuda")` and switch to eval mode with `.eval()` for inference.
+
 ### N-gram method (KenLM)
 
-The n-gram dotter is backed by [KenLM](https://github.com/kpu/kenlm). Install it
-separately, setting `MAX_ORDER` to at least the n-gram order you intend to load
-(published orders go up to 8):
+The n-gram dotter is backed by [KenLM](https://github.com/kpu/kenlm), which
+compiles from source and is therefore **not** a dependency of `tnqeet`. Install
+it yourself, setting `MAX_ORDER` to at least the highest n-gram order you intend
+to load. tnqeet publishes orders up to 8, so build with `MAX_ORDER=8` (KenLM's
+own default is 6, which cannot load orders 7–8):
 
 ```bash
 MAX_ORDER=8 pip install "git+https://github.com/kpu/kenlm.git"
 ```
 
+Then:
+
 ```python
 from tnqeet.dotting_models.ngrams.models import NgramDotter
 
 dotter = NgramDotter.from_pretrained(order=6, beam_size=10)
-dotter.restore_dots("لسٮٯ الڡٮ９ سطر وسطر ڡؤاده")
+
+dotter.restore_dots("لساں الڡٮى سطر وسطر ڡواده")
+# -> "لسان الفتى شطر وشطر فؤاده"
 ```
 
 Calling `NgramDotter.from_pretrained(...)` without KenLM installed raises an
-`ImportError` with this install command.
+`ImportError` containing the install command above.
 
-See [CLAUDE.md](CLAUDE.md) for the full model inference APIs and project layout.
+See [CLAUDE.md](CLAUDE.md) for the full inference APIs and project layout.
 
 ## Development
 
-Clone this repo first, then, to install KenLM (used by the n-gram models) with larger ngrams for development, set the `MAX_ORDER` environment
-variable to your preferred n-gram order before installing, e.g.
-
-This project uses [uv](https://docs.astral.sh/uv/) for dependency management
-and packaging.
+The project uses [uv](https://docs.astral.sh/uv/) for dependency management and
+packaging. Clone the repository and set up the environment:
 
 ```bash
-# Set up the environment (installs the project and the dev dependency group)
-uv sync
+git clone https://github.com/MagedSaeed/tnqeet
+cd tnqeet
+uv sync   # installs the project plus the dev dependency group
+```
 
-# Run the quality checks
+`uv sync` installs everything needed to train, evaluate, and run the notebooks
+— including KenLM (built from source via `MAX_ORDER`, double check its installation) and the training/visualization tools (wandb, matplotlib, seaborn, ipython) that the published package omits. To build KenLM for a higher order, set `MAX_ORDER` before syncing:
+
+```bash
+MAX_ORDER=8 uv sync
+```
+
+Run the quality checks and tests:
+
+```bash
 uv run isort --check .
 uv run black --check .
 uv run ruff check .
 uv run mypy .
 uv run pytest
+```
 
-# Build and publish
+Building and publishing is handled by CI on a version tag (see
+`.github/workflows/publish.yml`); to build locally:
+
+```bash
 uv build
-uv publish
 ```
 
 ## License
