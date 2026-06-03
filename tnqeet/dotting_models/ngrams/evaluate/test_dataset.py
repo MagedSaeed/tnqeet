@@ -80,19 +80,21 @@ def evaluate_model(
     return summary
 
 
-ngram_beam = {
-    3: 15,
-    3: 50,
-    4: 50,
-    4: 30,
-    6: 50,
-    8: 50,
-    8: 60,
-    # 11: 90,
-    # 14: 100,
-}
+# (ngram_order, beam_size) pairs to evaluate. A list (not a dict) so that
+# repeated orders with different beam sizes are all kept.
+ngram_beam = [
+    (3, 15),
+    (3, 50),
+    (4, 50),
+    (4, 30),
+    (6, 50),
+    (8, 50),
+    (8, 60),
+    # (11, 90),
+    # (14, 100),
+]
 
-for ngrams, beam_size in ngram_beam.items():
+for ngrams, beam_size in ngram_beam:
     summary = evaluate_model(ngrams=ngrams, beam_size=beam_size)
     print(f"Summary for beam size {beam_size} and {ngrams} ngrams: {summary}")
     print("-" * 120)

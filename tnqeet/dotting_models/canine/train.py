@@ -7,8 +7,6 @@ from pytorch_lightning.loggers import WandbLogger
 from tnqeet.dotting_models.canine.data import CanineDottingDataModule
 from tnqeet.dotting_models.canine.models import (
     CANINE_MODEL_NAME,
-    LABEL_VOCAB_SIZE,
-    PAD_LABEL_ID,
     CanineDottingModel,
 )
 from tnqeet.dotting_models.canine.trainer import get_trainer
