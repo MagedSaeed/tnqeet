@@ -34,6 +34,37 @@ CANINE). The **n-gram** method additionally requires KenLM, which is not
 installed automatically because it compiles from source — see
 [N-gram method (KenLM)](#n-gram-method-kenlm).
 
+### CPU vs. GPU (torch backend)
+
+`tnqeet` depends on PyTorch. The default install above pulls the **CUDA** build
+of torch (the standard PyPI wheel on Linux), which brings in the `nvidia-*`
+packages. That is the right choice on a machine with an NVIDIA GPU.
+
+On a CPU-only machine you'll want the **CPU** build, which skips those packages.
+The CPU wheel of torch is not published on PyPI — it lives on PyTorch's own
+index — so point the installer at that index with the `cpu` extra:
+
+```bash
+pip install "tnqeet[cpu]" --extra-index-url https://download.pytorch.org/whl/cpu
+```
+
+If you install with **uv** rather than pip, add `--index-strategy unsafe-best-match`:
+
+```bash
+uv pip install "tnqeet[cpu]" --extra-index-url https://download.pytorch.org/whl/cpu \
+    --index-strategy unsafe-best-match
+```
+
+> The extra flag is needed because the PyTorch index also hosts old pinned
+> copies of other packages (e.g. `torchmetrics`). pip merges indexes and picks
+> the best version automatically; uv defaults to a stricter "first index wins"
+> strategy (a dependency-confusion safeguard), so it needs the flag to consider
+> PyPI's newer versions. Both indexes here are official and trusted.
+
+> From a repo clone you don't deal with any of this: the CPU/CUDA indexes are
+> configured in `pyproject.toml` and scoped to torch only, so `uv sync --extra
+> cpu` (or `--extra cuda`) just works.
+
 ## Usage
 
 ### Remove dots
