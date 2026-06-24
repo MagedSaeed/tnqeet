@@ -39,7 +39,17 @@ dependencies = [
 Homepage = "https://github.com/MagedSaeed/tnqeet"
 Repository = "https://github.com/MagedSaeed/tnqeet"
 
-[dependency-groups]
+[project.optional-dependencies]
+# Backend selection for torch (pick exactly one):
+#   cuda  -> CUDA wheels, pulls nvidia-* packages (this is also the default)
+#   cpu   -> CPU-only wheels, no nvidia-* packages
+# See the README for the exact install commands.
+cpu = [
+    "torch>=2.6.0",
+]
+cuda = [
+    "torch>=2.6.0",
+]
 dev = [
     "ruff",
     "mypy>=1.0,<2.0",
@@ -126,6 +136,29 @@ log_level = "DEBUG"
 
 [tool.uv.sources]
 kenlm = { git = "https://github.com/kpu/kenlm" }
+# torch is resolved from a CPU- or CUDA-specific index depending on which extra
+# is active. (uv honors these sources; pip users must pass --extra-index-url for
+# the cpu build -- see the README.)
+torch = [
+    { index = "pytorch-cpu", extra = "cpu" },
+    { index = "pytorch-cuda", extra = "cuda" },
+]
 
-# To install kenlm, set the MAX_ORDER env variable first to your preferred
-# n-gram order (e.g. 15 or 20) before running `uv sync`.
+# to install kenlm, do not forget to set the MAX_ORDER env variable first to your preferred number (maybe 15 or 20).
+
+# The cpu and cuda extras are mutually exclusive: they install the same torch
+# version from different indexes, so they must never be resolved together.
+[tool.uv]
+conflicts = [
+    [{ extra = "cpu" }, { extra = "cuda" }],
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cuda"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
