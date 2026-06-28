@@ -16,6 +16,9 @@ recursive-exclude tnqeet *.json
 recursive-exclude tnqeet *.pdf
 recursive-exclude tnqeet *.binary
 recursive-exclude tnqeet *.ckpt
+
+# ...but keep the bundled fewshot examples used by the LLM dotter at runtime.
+include tnqeet/data/fewshot_examples.json
 prune tnqeet/dotting_models/*/evaluation_results
 prune tnqeet/dotting_models/*/ablation_results
 prune tnqeet/dotting_models/*/visualization_figures

@@ -81,7 +81,7 @@ exclude = [
 ]
 
 [tool.setuptools.package-data]
-tnqeet = ["py.typed"]
+tnqeet = ["py.typed", "data/fewshot_examples.json"]
 
 [tool.setuptools_scm]
 # Version comes from git tags (vX.Y.Z). Untagged commits get a dev version

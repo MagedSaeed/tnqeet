@@ -1,12 +1,32 @@
 import os
+import json
+from importlib import resources
+
 import dspy
 from dotenv import load_dotenv
 import dspy.teleprompt
-from tnqeet.data import fewshot_val_dataset
 from tnqeet import remove_dots
 from tnqeet import constants
 
 load_dotenv()
+
+
+def _load_bundled_fewshot_examples():
+    """Load the bundled fewshot examples (dicts with a ``"text"`` field).
+
+    Reading the shipped JSON avoids downloading the datasets on every call.
+    Resolve via the top-level ``tnqeet`` package, not ``tnqeet.data`` -- the
+    latter's import downloads the datasets.
+    """
+    resource = resources.files("tnqeet").joinpath("data", "fewshot_examples.json")
+    if not resource.is_file():
+        raise FileNotFoundError(
+            "Bundled fewshot examples not found at tnqeet/data/fewshot_examples.json. "
+            "Regenerate them by importing tnqeet.data (or call "
+            "tnqeet.data.save_fewshot_examples())."
+        )
+    with resource.open("r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 class ArabicDottingSignature(dspy.Signature):
@@ -35,6 +55,7 @@ mapping_desc = f"""
     - {constants.MEEM_RASM} (MEEM_RASM) → م
     - {constants.HAMZA_RASM} (HAMZA_RASM) → ء
     - {constants.ALEF_RASM} (ALEF_RASM) → ا أ إ آ""".strip()
+
 
 class DetailedArabicDotingSignature(dspy.Signature):
     dotless_text = dspy.InputField(
@@ -81,10 +102,12 @@ class OpenRouterArabicDotter:
         dspy.configure(lm=self.lm)
 
         # Prepare few-shot examples if requested
-        fewshot_dataset = fewshot_dataset or fewshot_val_dataset
-        signature = dspy.Signature({**signature.input_fields, **signature.output_fields}, signature.instructions, signature.__doc__) # type: ignore
+        signature = dspy.Signature({**signature.input_fields, **signature.output_fields}, signature.instructions, signature.__doc__)  # type: ignore
         self.dotter = dspy.Predict(signature=signature)
         if num_fewshot > 0:
+            # Default to the bundled fewshot examples (no dataset download).
+            if fewshot_dataset is None:
+                fewshot_dataset = _load_bundled_fewshot_examples()
             examples = [
                 dspy.Example(
                     dotless_text=remove_dots(sample["text"]),  # type: ignore

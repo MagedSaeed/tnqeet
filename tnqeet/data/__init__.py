@@ -2,10 +2,10 @@ import datasets
 from tnqeet import constants
 from collections import defaultdict
 
-train_dataset = datasets.load_dataset(
+train_dataset = datasets.load_dataset(  # type: ignore
     "MagedSaeed/tnqeet-training-datasets", "all_shuffled", split="train"
 )
-test_dataset = datasets.load_dataset(
+test_dataset = datasets.load_dataset(  # type: ignore
     "MagedSaeed/tnqeet-testing-datasets", "all_shuffled", split="test"
 )
 
@@ -53,3 +53,37 @@ train_dataset = train_dataset.select(train_indices)  # type:ignore
 # print('train dataset number of words:', sum(len(example['text'].split()) for example in train_dataset))  # type:ignore
 # print(f"llms_val_dataset size: {len(val_dataset)}")
 # print(f"fewshot_val_dataset size: {len(fewshot_val_dataset)}")
+
+
+def save_fewshot_examples(path=None, force=False):
+    """Dump ``fewshot_val_dataset`` to the JSON file bundled with the package.
+
+    The LLM dotter reads ``tnqeet/data/fewshot_examples.json`` instead of
+    downloading the datasets on every call. This is a no-op when the file
+    already exists and is non-empty; pass ``force=True`` to regenerate it (e.g.
+    after changing the fewshot selection logic above).
+
+    Order is preserved so ``LabeledFewShot(sample=False)``, which takes the
+    first ``k`` rows, keeps selecting the same examples.
+    """
+    import json
+    from pathlib import Path
+
+    path = Path(path) if path else Path(__file__).with_name("fewshot_examples.json")
+    if not force and path.exists() and path.stat().st_size > 0:
+        print(f"Fewshot examples already present at {path}; pass force=True to regenerate.")
+        return path
+    examples = [
+        {"text": row["text"], "source": row.get("source")}  # type: ignore
+        for row in fewshot_val_dataset
+    ]
+    path.write_text(
+        json.dumps(examples, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    print(f"Wrote {len(examples)} fewshot examples to {path}")
+    return path
+
+
+# Ensure the bundled fewshot file exists (no-op if already present).
+save_fewshot_examples()
