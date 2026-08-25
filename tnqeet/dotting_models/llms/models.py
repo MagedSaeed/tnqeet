@@ -36,7 +36,7 @@ class ArabicDottingSignature(dspy.Signature):
 
 mapping_desc = f"""
     Letter mappings (undotted → possible dotted forms):
-    - {constants.BAA_RASM} (BAA_RASM) → ب ت ث ن
+    - {constants.BAA_RASM} (BAA_RASM) → ب ت ث
     - {constants.JEEM_RASM} (JEEM_RASM) → ج ح خ
     - {constants.DAL_RASM} (DAL_RASM) → د ذ
     - {constants.RAA_RASM} (RAA_RASM) → ر ز
