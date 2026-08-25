@@ -16,8 +16,10 @@ def evaluate_model(
     beam_size=10,
     overwrite=False,
     save_every=5,
+    results_dir: str | None = None,
 ):
-    results_dir = f"tnqeet/dotting_models/ngrams/evaluation_results/{dataset_name}/beam_size_{beam_size}"
+    if results_dir is None:
+        results_dir = f"tnqeet/dotting_models/ngrams/evaluation_results/{dataset_name}/beam_size_{beam_size}"
     os.makedirs(results_dir, exist_ok=True)
     results_file = os.path.join(results_dir, f"ngrams_{ngrams}.json")
     per_example_results = []
@@ -80,8 +82,9 @@ def evaluate_model(
     return summary
 
 
-for ngrams in range(2, 11):
-    for beam_size in [1, 3, 5, 7, 10, 12, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100]:
-        summary = evaluate_model(ngrams=ngrams, beam_size=beam_size)
-        print(f"Summary for beam size {beam_size} and {ngrams} ngrams: {summary}")
-        print("-" * 120)
+if __name__ == "__main__":
+    for ngrams in range(2, 11):
+        for beam_size in [1, 3, 5, 7, 10, 12, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100]:
+            summary = evaluate_model(ngrams=ngrams, beam_size=beam_size)
+            print(f"Summary for beam size {beam_size} and {ngrams} ngrams: {summary}")
+            print("-" * 120)

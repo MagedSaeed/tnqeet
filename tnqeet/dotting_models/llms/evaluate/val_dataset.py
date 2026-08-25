@@ -39,6 +39,7 @@ def evaluate_model(
     overwrite=False,
     save_every=5,
     retry=5,
+    results_dir: str | None = None,
 ):
     if prompt_type == "default":
         signature = ArabicDottingSignature
@@ -53,9 +54,10 @@ def evaluate_model(
     else:
         raise ValueError(f"Unknown fewshot value: {num_fewshot}")
     assert retry > 0 and isinstance(retry, int), "retry must be an integer greater than 0"
-    results_dir = (
-        f"tnqeet/dotting_models/llms/evaluation_results/{dataset_name}/{evaluation_type}/{prompt_type}_prompt"
-    )
+    if results_dir is None:
+        results_dir = (
+            f"tnqeet/dotting_models/llms/evaluation_results/{dataset_name}/{evaluation_type}/{prompt_type}_prompt"
+        )
     os.makedirs(results_dir, exist_ok=True)
     # make sure {model_name}.json file exists in the results_dir
     results_file = os.path.join(results_dir, f"{model_name}.json")
@@ -146,17 +148,18 @@ def evaluate_model(
 # print(evaluate_model('gemma-3'))
 
 # for prompt_type in ("default", "detailed"):
-for prompt_type in ("default", "detailed"):
-    for fewshot in (0, 1, 3, 5, 8, 10):
-        for model in list(OPEN_ROUTER_MODELS.keys()):
-            summary = evaluate_model(
-                model_name=model,
-                prompt_type=prompt_type,
-                num_fewshot=fewshot,
-            )
-            print(f"Summary for {model} with {prompt_type} prompt and {fewshot} fewshot: {summary}")
-            print("-" * 120)
-        print("=" * 120)
+if __name__ == "__main__":
+    for prompt_type in ("default", "detailed"):
+        for fewshot in (0, 1, 3, 5, 8, 10):
+            for model in list(OPEN_ROUTER_MODELS.keys()):
+                summary = evaluate_model(
+                    model_name=model,
+                    prompt_type=prompt_type,
+                    num_fewshot=fewshot,
+                )
+                print(f"Summary for {model} with {prompt_type} prompt and {fewshot} fewshot: {summary}")
+                print("-" * 120)
+            print("=" * 120)
 # print("=" * 120)
 # for model in list(OPEN_ROUTER_MODELS.keys()):
 #     summary = evaluate_model(

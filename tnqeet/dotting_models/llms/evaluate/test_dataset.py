@@ -34,6 +34,7 @@ def evaluate_model(
     save_every=5,
     retry=5,
     use_openrouter_model=True,
+    results_dir: str | None = None,
 ):
     if prompt_type == "default":
         signature = ArabicDottingSignature
@@ -48,9 +49,10 @@ def evaluate_model(
     else:
         raise ValueError(f"Unknown fewshot value: {num_fewshot}")
     assert retry > 0 and isinstance(retry, int), "retry must be an integer greater than 0"
-    results_dir = (
-        f"tnqeet/dotting_models/llms/evaluation_results/{dataset_name}/{evaluation_type}/{prompt_type}_prompt"
-    )
+    if results_dir is None:
+        results_dir = (
+            f"tnqeet/dotting_models/llms/evaluation_results/{dataset_name}/{evaluation_type}/{prompt_type}_prompt"
+        )
     os.makedirs(results_dir, exist_ok=True)
     # make sure {model_name}.json file exists in the results_dir
     results_file = os.path.join(results_dir, f"{model_name}.json")
@@ -137,16 +139,12 @@ def evaluate_model(
 
 
 # for model_name in list(ORIGINAL_MODELS.keys()):
-for model_name in list(OPEN_ROUTER_MODELS.keys()):
-    summary = evaluate_model(
-        num_fewshot=8,
-        model_name=model_name,
-        # use_openrouter_model=False,
-    )
-    print(f"Summary for {model_name} with 8 fewshot: {summary}")
-    print("-" * 120)
-
-
-"""
-for reference, gemini was called via openrouter, but others are called directly from the provider.
-"""
+if __name__ == "__main__":
+    for model_name in list(OPEN_ROUTER_MODELS.keys()):
+        summary = evaluate_model(
+            num_fewshot=8,
+            model_name=model_name,
+            # use_openrouter_model=False,
+        )
+        print(f"Summary for {model_name} with 8 fewshot: {summary}")
+        print("-" * 120)

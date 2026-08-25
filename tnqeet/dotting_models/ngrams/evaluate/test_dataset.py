@@ -16,8 +16,10 @@ def evaluate_model(
     beam_size=10,
     overwrite=False,
     save_every=5,
+    results_dir: str | None = None,
 ):
-    results_dir = f"tnqeet/dotting_models/ngrams/evaluation_results/{dataset_name}/beam_size_{beam_size}"
+    if results_dir is None:
+        results_dir = f"tnqeet/dotting_models/ngrams/evaluation_results/{dataset_name}/beam_size_{beam_size}"
     os.makedirs(results_dir, exist_ok=True)
     results_file = os.path.join(results_dir, f"ngrams_{ngrams}.json")
     per_example_results = []
@@ -80,21 +82,22 @@ def evaluate_model(
     return summary
 
 
-# (ngram_order, beam_size) pairs to evaluate. A list (not a dict) so that
-# repeated orders with different beam sizes are all kept.
-ngram_beam = [
-    (3, 15),
-    (3, 50),
-    (4, 50),
-    (4, 30),
-    (6, 50),
-    (8, 50),
-    (8, 60),
-    # (11, 90),
-    # (14, 100),
-]
+if __name__ == "__main__":
+    # (ngram_order, beam_size) pairs to evaluate. A list (not a dict) so that
+    # repeated orders with different beam sizes are all kept.
+    ngram_beam = [
+        (3, 15),
+        (3, 50),
+        (4, 50),
+        (4, 30),
+        (6, 50),
+        (8, 50),
+        (8, 60),
+        # (11, 90),
+        # (14, 100),
+    ]
 
-for ngrams, beam_size in ngram_beam:
-    summary = evaluate_model(ngrams=ngrams, beam_size=beam_size)
-    print(f"Summary for beam size {beam_size} and {ngrams} ngrams: {summary}")
-    print("-" * 120)
+    for ngrams, beam_size in ngram_beam:
+        summary = evaluate_model(ngrams=ngrams, beam_size=beam_size)
+        print(f"Summary for beam size {beam_size} and {ngrams} ngrams: {summary}")
+        print("-" * 120)

@@ -21,8 +21,10 @@ def evaluate_model(
     save_every=5,
     model_name=MODEL_NAME,
     n_layers=4,
+    results_dir: str | None = None,
 ):
-    results_dir = f"tnqeet/dotting_models/sequence_labeling/evaluation_results/{dataset_name}"
+    if results_dir is None:
+        results_dir = f"tnqeet/dotting_models/sequence_labeling/evaluation_results/{dataset_name}"
     os.makedirs(results_dir, exist_ok=True)
     results_file = os.path.join(results_dir, f"{model_name}_layers_{n_layers}_results.json")
     per_example_results = []

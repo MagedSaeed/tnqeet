@@ -25,8 +25,10 @@ def evaluate_model(
     overwrite: bool = False,
     save_every: int = 5,
     model_name: str = run_name_from_model(CANINE_MODEL_NAME),
+    results_dir: str | None = None,
 ):
-    results_dir = f"tnqeet/dotting_models/canine/evaluation_results/{dataset_name}"
+    if results_dir is None:
+        results_dir = f"tnqeet/dotting_models/canine/evaluation_results/{dataset_name}"
     os.makedirs(results_dir, exist_ok=True)
     results_file = os.path.join(results_dir, f"{model_name}_results.json")
 

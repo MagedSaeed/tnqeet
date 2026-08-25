@@ -24,8 +24,10 @@ def evaluate_model(
     save_every: int = 5,
     model_name: str = MODEL_NAME,
     n_layers: int = 6,
+    results_dir: str | None = None,
 ):
-    results_dir = f"tnqeet/dotting_models/transformer/evaluation_results/{dataset_name}"
+    if results_dir is None:
+        results_dir = f"tnqeet/dotting_models/transformer/evaluation_results/{dataset_name}"
     os.makedirs(results_dir, exist_ok=True)
     results_file = os.path.join(
         results_dir, f"{model_name}_layers_{n_layers}_results.json"
