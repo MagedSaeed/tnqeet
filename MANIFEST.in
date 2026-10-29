@@ -27,3 +27,16 @@ prune tnqeet/dotting_models/*/training_logs
 prune tnqeet/dotting_models/llms/ablations
 prune tnqeet/dotting_models/ngrams/test_results_kenlm_output
 prune tnqeet/notebooks
+
+# One-off maintenance / analysis scripts, cluster job scripts, and ad-hoc tests
+# are not part of the dotting library.
+exclude tnqeet/dotting_models/llms/fix_metrics_issue.py
+exclude tnqeet/dotting_models/llms/recompute_untruncated_metrics.py
+exclude tnqeet/dotting_models/llms/evaluate/val_dataset_noon_comparison.py
+exclude tnqeet/dotting_models/sequence_labeling/prepare_tokenizer.py
+exclude tnqeet/evaluate/tests.py
+recursive-exclude tnqeet *.sh
+
+# Repo-only tooling files.
+exclude CLAUDE.md .gitignore .gitattributes uv.lock
+prune .github
